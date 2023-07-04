@@ -16,6 +16,13 @@ impl	Color{
 	pub	fn black() -> Self{
 		Color::new(0.0, 0.0, 0.0)
 	}
+	pub fn	clamp(&self, lower_bound: f64, upper_bound: f64) -> Color{
+		Color::new(
+			self.red.min(upper_bound).max(lower_bound),
+			self.green.min(upper_bound).max(lower_bound),
+			self.blue.min(upper_bound).max(lower_bound),
+		)
+	}
 }
 
 impl ops::Add<Self> for Color {
@@ -115,4 +122,12 @@ mod	tests {
 		let expected_col = Color::new(0.9, 0.2, 0.04);
 		assert_eq!(col1 * col2, expected_col);
 	}
+	#[test]
+	fn	color_clamping()
+	{
+		let col1 = Color::new(1.1, 2.3, -6.4);
+		let expected_col = Color::new(1.0, 1.0, 0.0);
+		assert_eq!(col1.clamp(0.0, 1.0), expected_col);
+	}
+
 }
