@@ -1,4 +1,4 @@
-use std::{vec::Vec, fmt::format, arch::x86_64::_CMP_TRUE_UQ};
+use std::vec::Vec;
 use crate::color::Color;
 
 // use super::util::*;
@@ -91,7 +91,7 @@ impl Canvas{
 	}
 }
 
-trait ToPPM {
+pub trait ToPPM {
 	fn	to_ppm(&self) -> Vec<u8>;
 }
 

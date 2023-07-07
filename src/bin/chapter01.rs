@@ -1,6 +1,6 @@
 extern crate rustic_rt as raytracer;
 
-use raytracer::tuple::*;
+use super::util::*;
 
 #[derive(Debug)]
 struct Environment {
