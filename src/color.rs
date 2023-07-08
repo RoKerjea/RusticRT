@@ -1,6 +1,6 @@
 use std::ops;
 
-use super::util::*;
+use super::fuzzy_eq::*;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Color{
@@ -73,9 +73,9 @@ impl	ops::Mul<Color> for Color{
 
 impl PartialEq<Color> for Color {
 	fn eq(&self, other: &Self) -> bool {
-		return epsil_compare(self.red, other.red)
-		&& epsil_compare(self.blue, other.blue)
-		&& epsil_compare(self.green, other.green);
+		return self.red.fuzzy_eq(&other.red)
+		&& self.blue.fuzzy_eq(&other.blue)
+		&& self.green.fuzzy_eq(&other.green)
 	}
 }
 

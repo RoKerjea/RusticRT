@@ -1,6 +1,6 @@
 use std::ops;
 
-use super::util::*;
+use super::fuzzy_eq::*;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
@@ -31,10 +31,10 @@ impl Tuple {
 
 impl PartialEq<Tuple> for Tuple {
 	fn eq(&self, other: &Self) -> bool {
-		return epsil_compare(self.x, other.x)
-		&& epsil_compare(self.y, other.y)
-		&& epsil_compare(self.z, other.z)
-		&& epsil_compare(self.w, other.w);
+		return self.x.fuzzy_eq(&other.x)
+		&& self.y.fuzzy_eq(&other.y)
+		&& self.z.fuzzy_eq(&other.z)
+		&& self.w.fuzzy_eq(&other.w);
 	}
 }
 
