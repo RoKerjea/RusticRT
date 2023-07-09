@@ -1,35 +1,44 @@
 use std::ops;
+use num_traits::Float;
 
-use super::fuzzy_eq::*;
+use crate::fuzzy_eq::*;
 
 #[derive(Debug, Copy, Clone)]
-pub struct Tuple {
-	pub x : f64,
-	pub y : f64,
-	pub z : f64,
-	pub w : f64,
+pub struct Tuple<T>
+where
+	T: Float,
+{
+	pub x : T,
+	pub y : T,
+	pub z : T,
+	pub w : T,
 }
 
-impl Tuple {
-	pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
+impl<T> Tuple<T>
+where
+	T: Float,
+{
+	pub fn new(x: T, y: T, z: T, w: T) -> Self {
         Self { x, y, z, w }
     }
-	pub fn point(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z, w : 1.0 }
+	pub fn point(x: T, y: T, z: T) -> Self {
+        Self { x, y, z, w : T::one()}
 	}
-	pub fn vector(x: f64, y: f64, z: f64) -> Self {
-        Self { x, y, z, w : 0.0 }
+	pub fn vector(x: T, y: T, z: T) -> Self {
+        Self { x, y, z, w : T::zero()}
 	}
 	pub fn is_point(&self) -> bool {
-        self.w == 1.0
+        self.w == T::one()
     }
     pub fn is_vector(&self) -> bool {
-        self.w == 0.0
+        self.w == T::zero()
     }
 }
 
-
-impl PartialEq<Tuple> for Tuple {
+impl<T> PartialEq<Self> for Tuple<T>
+where
+	T: Float,
+{
 	fn eq(&self, other: &Self) -> bool {
 		return self.x.fuzzy_eq(&other.x)
 		&& self.y.fuzzy_eq(&other.y)
@@ -38,33 +47,38 @@ impl PartialEq<Tuple> for Tuple {
 	}
 }
 
-impl Tuple {
-	pub fn magnitude(&self) -> f64{
+impl<T> Tuple<T>
+where
+	T: Float,
+{
+	pub fn magnitude(&self) -> T{
 		(self.x.powi(2) + self.y.powi(2)
 		+ self.z.powi(2) + self.w.powi(2)).sqrt()
 	}
-	pub fn normalize(&self) -> Tuple{
+	pub fn normalize(&self) -> Tuple<T>{
 		*self / self.magnitude()
 	}
-	pub fn	dot(&self, other: &Self) -> f64{
+	pub fn	dot(&self, other: &Self) -> T{
 		self.x * other.x +
 		self.y * other.y +
 		self.z * other.z +
 		self.w * other.w
 	}
-	pub fn	cross(&self, other: &Self) -> Tuple{
+	pub fn	cross(&self, other: &Self) -> Self{
 		Tuple::new(
 			self.y * other.z - self.z * other.y,
 			self.z * other.x - self.x * other.z,
 			self.x * other.y - self.y * other.x,
-			0.0,
+			T::zero(),
 		)
 	}
 }
 
-impl ops::Add<Self> for Tuple {
+impl<T> ops::Add<Self> for Tuple<T>
+where
+	T: Float,
+{
 	type Output = Self;
-
 	fn add(self, other: Self) -> Self::Output {
 		Tuple::new(
             self.x + other.x,
@@ -75,7 +89,10 @@ impl ops::Add<Self> for Tuple {
 	}
 }
 
-impl ops::Sub<Self> for Tuple {
+impl<T> ops::Sub<Self> for Tuple<T>
+where
+	T: Float,
+{
 	type Output = Self;
 	fn sub(self, other: Self) -> Self{
 		Tuple::new(
@@ -86,9 +103,12 @@ impl ops::Sub<Self> for Tuple {
 		)
 	}
 }
-impl ops::Mul<f64> for Tuple {
+impl<T> ops::Mul<T> for Tuple<T>
+where
+	T: Float,
+{
 	type Output = Self;
-	fn mul(self, other: f64) -> Self{
+	fn mul(self, other: T) -> Self{
 		Tuple::new(
             self.x * other,
             self.y * other,
@@ -97,14 +117,25 @@ impl ops::Mul<f64> for Tuple {
 		)
 	}
 }
-impl ops::Div<f64> for Tuple {
+impl<T> ops::Div<T> for Tuple<T>
+where
+	T: Float,
+{
 	type Output = Self;
-	fn div(self, other: f64) -> Self{
-		self * (1.0 / other)
+	fn div(self, other: T) -> Self{
+		Tuple::new(
+            self.x / other,
+            self.y / other,
+            self.z / other,
+            self.w / other,
+		)
 	}
 }
 
-impl ops::Neg for Tuple {
+impl<T> ops::Neg for Tuple<T>
+where
+	T: Float,
+{
 	type Output = Self;
 	fn neg(self) -> Self{
 		Tuple::new(
