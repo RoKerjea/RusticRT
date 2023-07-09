@@ -6,12 +6,10 @@ use std::ops::{Index, IndexMut, Mul};
 use crate::fuzzy_eq::*;
 use crate::tuple::*;
 
-type Matrix2f = Matrix<f64, 2>;
+type Matrix3f = Matrix<f64, 3>;
 
 type Matrix4fArray= [Matrix4fArrayRow; 4];
 type Matrix4fArrayRow = [f64; 4];
-type Matrix3fArray= [Matrix3fArrayRow; 3];
-type Matrix3fArrayRow = [f64; 3];
 
 // @TODO refactor matrix to have one universal type
 
@@ -88,6 +86,79 @@ where
 	}
 }
 
+impl<T> Matrix<T, 3>
+where
+	T: Float,
+{
+	//@TODO Big refacto here, it's actually worse than what I improvised in C
+	//for MiniRT, and that was already not very pretty
+	// pub fn	submatrix(&self, row: usize, col: usize) -> Matrix{
+	// 	let mut res = Matrix::new();
+	// 	let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
+	// 	while sub_row < 2
+	// 	{
+	// 		while sub_col < 2
+	// 		{
+	// 			if self_col != col && self_row != row
+	// 			{
+	// 				res[sub_row][sub_col]= self[self_row][self_col];
+	// 				sub_col += 1;
+	// 			}
+	// 			self_col += 1;
+	// 		}
+	// 		self_row += 1;
+	// 		self_col = 0;
+	// 		if sub_row != row {
+	// 			sub_row += 1;
+	// 		}
+	// 		sub_col = 0;
+	// 	}
+	// 	res
+	// }
+	//Absolutly dreadful, very excited to be able to refacto that
+	//still can't deviate too much from example
+	pub fn submatrix(&self, row: usize, column: usize) -> Matrix<T, 2>
+	{
+		let mut m: Matrix<T, 2> = Matrix::new();
+		let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
+		while sub_row < 2 {
+			if self_row == row {
+			// Skip row to be removed
+				self_row += 1;
+			}
+			while sub_col < 2 {
+				if self_col == column {
+				// Skip column to be removed
+					self_col += 1;
+				}
+				m[sub_row][sub_col] = self[self_row][self_col];
+
+				self_col += 1;
+				sub_col += 1;
+			}
+			self_row += 1;
+			self_col = 0;
+			sub_row += 1;
+			sub_col = 0;
+		}
+		return m;
+	}
+	pub fn minor(&self, row: usize, column: usize) -> T {
+		self.submatrix(row, column).determinant()
+	}
+	pub	fn cofactor(&self, row: usize, column: usize) -> T {
+		let res = self.minor(row, column);
+		if (row + column) % 2 != 0{
+			return -res;
+		}
+		return res;
+	}
+	pub fn determinant(&self) -> T {
+		return 	self[0][0] * self.cofactor(0, 0)
+				+ self[0][1] * self.cofactor(0, 1)
+				+ self[0][2] * self.cofactor(0, 2);
+	}
+}
 //////////////////////////////////////////////////////////
 
 // #[derive(Debug, Copy, Clone)]
@@ -122,74 +193,7 @@ impl Matrix3f {
 	// 		[0.0, 0.0, 0.0],
 	// 		[0.0, 0.0, 0.0],])
 	// }
-	//@TODO Big refacto here, it's actually worse than what I improvised in C
-	//for MiniRT, and that was already not very pretty
-	// pub fn	submatrix(&self, row: usize, col: usize) -> Matrix2f{
-	// 	let mut res = Matrix2f::new();
-	// 	let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
-	// 	while sub_row < 2
-	// 	{
-	// 		while sub_col < 2
-	// 		{
-	// 			if self_col != col && self_row != row
-	// 			{
-	// 				res[sub_row][sub_col]= self[self_row][self_col];
-	// 				sub_col += 1;
-	// 			}
-	// 			self_col += 1;
-	// 		}
-	// 		self_row += 1;
-	// 		self_col = 0;
-	// 		if sub_row != row {
-	// 			sub_row += 1;
-	// 		}
-	// 		sub_col = 0;
-	// 	}
-	// 	res
-	// }
-	//Absolutly dreadful, very excited to be able to refacto that
-	//still can't deviate too much from example
-	pub fn submatrix(&self, row: usize, column: usize) -> Matrix2f {
-		let mut m = Matrix2f::new();
-		let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
-		while sub_row < 2 {
-			if self_row == row {
-			// Skip row to be removed
-				self_row += 1;
-			}
-			while sub_col < 2 {
-				if self_col == column {
-				// Skip column to be removed
-					self_col += 1;
-				}
-				m[sub_row][sub_col] = self[self_row][self_col];
-
-				self_col += 1;
-				sub_col += 1;
-			}
-			self_row += 1;
-			self_col = 0;
-			sub_row += 1;
-			sub_col = 0;
-		}
-		return m;
-	}
-	pub fn minor(&self, row: usize, column: usize) -> f64{
-		return  self.submatrix(row, column).determinant();
-	}
-	pub	fn cofactor(&self, row: usize, column: usize) -> f64{
-		let mut res = self.minor(row, column);
-		if (row + column) % 2 == 1{
-			res *= -1.0;
-		}
-		res
-	}
-	pub fn determinant(&self) -> f64 {
-		return 	self[0][0] * self.cofactor(0, 0)
-				+ self[0][1] * self.cofactor(0, 1)
-				+ self[0][2] * self.cofactor(0, 2);
-
-	}
+	
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -392,7 +396,7 @@ mod tests{
 	#[test]
 	fn	constructing_a_2fmatrix()
 	{
-		let matrix1 = Matrix2f::from([
+		let matrix1 = Matrix::from([
 			[-3.0, 5.0],
 			[1.0, -2.0],]);
 		assert_eq!(matrix1[0][0], -3.0);
@@ -455,10 +459,10 @@ mod tests{
 	}
 	#[test]
 	fn	comparing_2fmatrixes_true(){
-		let matrix1 = Matrix2f::from([
+		let matrix1 = Matrix::from([
 			[-3.0, 5.0],
 			[1.0, -2.0],]);
-		let matrix2 = Matrix2f::from([
+		let matrix2 = Matrix::from([
 			[-3.0, 5.0],
 			[1.0, -2.0],]);
 		assert!(matrix1.fuzzy_eq(&matrix2));
@@ -530,7 +534,7 @@ mod tests{
 	#[test]
 	fn	determinant_of_a_2f_matrix()
 	{
-		let mat1 = Matrix2f::from([
+		let mat1 = Matrix::from([
 			[1.0, 5.0],
 			[-3.0, 2.0],]);
 		let expected_res = 17.0;
@@ -543,7 +547,7 @@ mod tests{
 			[1.0, 5.0, 0.0],
 			[-3.0, 2.0, 7.0],
 			[0.0, 6.0, -3.0],]);
-		let expected_res = Matrix2f::from([
+		let expected_res = Matrix::from([
 			[-3.0, 2.0],
 			[0.0, 6.0],]);
 		let	actual_res = matrix1.submatrix(0, 2);
