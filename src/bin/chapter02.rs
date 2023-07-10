@@ -2,35 +2,51 @@ extern crate rustic_rt as raytracer;
 
 
 use std::fs::write;
+use num_traits::Float;
 use raytracer::tuple::*;
 use raytracer::canvas::*;
 use raytracer::color::*;
 
 #[derive(Debug)]
-struct Environment {
-    gravity: Tuple,
-    wind: Tuple,
+struct Environment<T>
+where
+	T: Float,
+{
+    gravity: Tuple<T>,
+    wind: Tuple<T>,
 }
 
 #[derive(Debug)]
-struct Projectile {
-    position: Tuple,
-    velocity: Tuple,
+struct Projectile<T>
+where
+	T: Float,
+{
+    position: Tuple<T>,
+    velocity: Tuple<T>,
 }
 
-impl Projectile {
-    pub fn new(position: Tuple, velocity: Tuple) -> Self {
+impl<T> Projectile<T>
+where
+	T: Float,
+{
+    pub fn new(position: Tuple<T>, velocity: Tuple<T>) -> Self {
         Projectile { position, velocity }
     }
 }
 
-impl Environment {
-    pub fn new(gravity: Tuple, wind: Tuple) -> Self {
+impl<T> Environment<T>
+where
+	T: Float,
+{
+    pub fn new(gravity: Tuple<T>, wind: Tuple<T>) -> Self {
         Environment { gravity, wind }
     }
 }
 
-fn tick(environment: &Environment, projectile: &Projectile) -> Projectile {
+fn tick<T>(environment: &Environment<T>, projectile: &Projectile<T>) -> Projectile<T>
+where
+	T: Float,
+{
     Projectile::new(
         projectile.position + projectile.velocity,
         projectile.velocity + environment.gravity + environment.wind,
@@ -47,7 +63,10 @@ enum Pixel {
 
 
 impl Pixel {
-	fn from_point_for_canvas(point: Tuple, canvas: &Canvas) -> Pixel {
+	fn from_point_for_canvas<T>(point: Tuple<T>, canvas: &Canvas) -> Pixel
+	where
+		T: Float,
+	{
 		if !point.is_point() {
 			panic!("Given tuple is not point. Point is needed to conversion for screen space.");
 		}
@@ -55,8 +74,8 @@ impl Pixel {
 		let rx = point.x.round();
 		let ry = point.y.round();
 
-		let ux = rx as usize;
-		let uy = ry as usize;
+		let ux = rx.to_usize().unwrap();
+        let uy = ry.to_usize().unwrap();
 
 		if rx.is_sign_negative() || ry.is_sign_negative() || ux >= canvas.width || uy >= canvas.height{
 			return Pixel::OutOfBound;

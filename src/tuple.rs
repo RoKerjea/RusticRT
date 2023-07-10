@@ -38,6 +38,7 @@ where
 impl<T> PartialEq<Self> for Tuple<T>
 where
 	T: Float,
+    T: FuzzyEq<T>,
 {
 	fn eq(&self, other: &Self) -> bool {
 		return self.x.fuzzy_eq(&other.x)

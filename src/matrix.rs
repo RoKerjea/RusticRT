@@ -411,7 +411,7 @@ mod tests{
 			[0.0, 0.0, 0.0, 1.0],]);
 		let tuplearg = Tuple::point(1.0, 2.0, 3.0);
 
-		let actual_res:Tuple = matrix1 * tuplearg;
+		let actual_res:Tuple<f64> = matrix1 * tuplearg;
 		let expected = Tuple::point(18.0, 24.0, 33.0);
 		assert_eq!(actual_res, expected);
 	}
