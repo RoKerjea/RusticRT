@@ -3,9 +3,11 @@ extern crate rustic_rt as raytracer;
 
 use std::fs::write;
 use num_traits::Float;
-use raytracer::tuple::*;
+
 use raytracer::canvas::*;
-use raytracer::color::*;
+use raytracer::canvas::to_ppm::*;
+use raytracer::canvas::to_png::*;
+use raytracer::tuple::*;
 
 #[derive(Debug)]
 struct Environment<T>
@@ -115,7 +117,12 @@ fn main() {
     }
     println!("FINISHED => {}: {:?}", iteration, current);
 
-	let ppm = canvas.to_ppm();
-	write("./ouput.ppm", ppm).expect("Could not write ppm to disk.");
-    println!("END");
+    println!("Writing ./output.ppm");
+    let ppm = canvas.to_ppm();
+    write("./output.ppm", ppm).expect("Could not write ouput.ppm to disk.");
+    println!("Writing ./output.png");
+    let png = canvas.to_png();
+    write("./output.png", png).expect("Could not write ouput.png to disk.");
+
+    println!("Everything done.");
 }

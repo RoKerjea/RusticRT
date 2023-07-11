@@ -599,5 +599,25 @@ mod tests{
 	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
 	// 	let p = Tuple::point(-3.0, 4.0, 5.0);
 	// 	let expected = Tuple::point(2.0, 1.0, 7.0);
+	// 	let actual_res = p * matrix_translate;
+	// 	assert_eq!(actual_res, expected);
+	// }
+	// #[test]
+	// fn	applying_inverse_translation_matrix_to_point()
+	// {
+	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
+	// 	let p = Tuple::point(-3.0, 4.0, 5.0);
+	// 	let expected = Tuple::point(-8.0, 7.0, 3.0);
+	// 	let actual_res = p * matrix_translate.inverse();
+	// 	assert_eq!(actual_res, expected);
+	// }
+	// #[test]
+	// fn	translation_doesnt_work_on_vectors()
+	// {
+	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
+	// 	let p = Tuple::vector(-3.0, 4.0, 5.0);
+	// 	let expected = Tuple::vector(-3.0, 4.0, 5.0);
+	// 	let actual_res = p * matrix_translate;
+	// 	assert_eq!(actual_res, expected);
 	// }
 }

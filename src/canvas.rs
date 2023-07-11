@@ -1,17 +1,30 @@
+pub mod to_rgba32;
+pub mod to_ppm;
+pub mod to_png;
+
 use std::vec::Vec;
+use num_traits::Float;
 use crate::color::Color;
 
 // use super::util::*;
 
+pub trait	Sized {
+	fn	width(&self) -> usize;
+	fn	height(&self) -> usize;
+}
+
 #[derive(Debug, Clone)]
-pub struct	Canvas{
+pub struct	Canvas<T = f64>
+where
+	T: Float,
+{
 	pub width : usize,
 	pub height : usize,
 
-	pixels: Vec<Color>,
+	pixels: Vec<Color<T>>,
 }
 
-impl Canvas{
+impl<T: Float> Canvas<T>{
 	pub fn new(width: usize, height: usize) -> Self{
 		Self {
 			width,
@@ -19,90 +32,15 @@ impl Canvas{
 			pixels: vec![Color::black(); width * height],
 		}
 	}
-	pub	fn color_at(&self, x: usize, y:usize) -> Color {
+	pub	fn color_at(&self, x: usize, y:usize) -> Color<T> {
 		self.pixels[self.get_pixel_index(x, y)]
 	}
 	pub fn	get_pixel_index(&self, x: usize, y: usize) ->usize {
 		y * self.width + x
 	}
-	pub fn	write_pixel(&mut self, x: usize, y: usize, color:Color){
+	pub fn	write_pixel(&mut self, x: usize, y: usize, color:Color<T>){
 		let index = self.get_pixel_index(x, y);
 		self.pixels[index] = color;
-	}
-	pub fn	create_ppm_header(&self) -> Vec<u8>{
-		let mut header = Vec::new();
-		header.extend(String::from("P3\n").into_bytes());
-		header.extend(format!("{} {}\n", self.width, self.height).into_bytes());
-		header.extend(format!("{}\n", 255).into_bytes());
-		return header;
-	}
-
-	//This is quite litterally the worst code i wrote in more han a year
-	//If the video doesn't refactor it really heavily, I HAVE to do it!!!
-	pub fn	create_ppm_pixel_data(&self) -> Vec<u8>{
-		let mut pixel_strings : Vec <String> = Vec::new();
-		for pixel in self.pixels.iter()
-		{
-			let clamped_color = pixel.clamp(0.0, 1.0);
-			let r: u8 = (clamped_color.red * 255.0).round() as u8;
-			let g: u8 = (clamped_color.green * 255.0).round() as u8;
-			let b: u8 = (clamped_color.blue * 255.0).round() as u8;
-			pixel_strings.push(format!("{}", r));
-			pixel_strings.push(format!("{}", g));
-			pixel_strings.push(format!("{}", b));
-		}
-		let mut pixel_data : Vec<u8> = Vec::new();
-		let mut colum_count: usize = 0;
-		let mut last_image_row: usize = 0;
-		for (i, pixel_string) in pixel_strings.iter().enumerate()
-		{
-			//Line break for each row
-			let current_img_row = i / (self.width * 3);
-			if current_img_row != last_image_row
-			{
-				last_image_row = current_img_row;
-				pixel_data.extend(String::from("\n").into_bytes());
-				colum_count = 0;
-			}
-			let mut needed_space: usize = 0;
-			if colum_count != 0
-			{
-				needed_space += 1;
-			}
-			needed_space += pixel_string.len();
-
-			//Do not exceed 70 char per line
-			if colum_count + needed_space > 70
-			{
-				pixel_data.extend(String::from("\n").into_bytes());
-				colum_count = 0;
-			}
-			if colum_count != 0
-			{
-				pixel_data.extend(String::from(" ").into_bytes());
-				colum_count += 1;
-			}
-			pixel_data.extend(pixel_string.clone().into_bytes());
-			colum_count += pixel_string.len();
-		}
-		//last linebreak at the end of data
-		pixel_data.extend(String::from("\n").into_bytes());
-		return pixel_data;
-	}
-}
-
-pub trait ToPPM {
-	fn	to_ppm(&self) -> Vec<u8>;
-}
-
-impl ToPPM for Canvas {
-	fn	to_ppm(&self) -> Vec<u8> {
-		let header = self.create_ppm_header();
-		let pixel_data = self.create_ppm_pixel_data();
-		let mut ppm = Vec::new();
-		ppm.extend(header);
-		ppm.extend(pixel_data);
-		return ppm;
 	}
 }
 

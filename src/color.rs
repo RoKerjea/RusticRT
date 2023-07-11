@@ -1,22 +1,27 @@
-use std::ops;
+use std::ops::{Add, Mul, Sub};
+use num_traits::Num;
+use num_traits::Float;
 
 use super::fuzzy_eq::*;
 
 #[derive(Debug, Copy, Clone)]
-pub struct Color{
-	pub red : f64,
-	pub green : f64,
-	pub blue : f64,
+pub struct Color<T = f64>
+where
+	T: Float,
+{
+	pub red : T,
+	pub green : T,
+	pub blue : T,
 }
 
-impl	Color{
-	pub fn new(red: f64, green: f64, blue: f64) -> Self {
+impl<T: Float>	Color<T>{
+	pub fn new(red: T, green: T, blue: T) -> Self {
 		Self {red, green, blue}
 	}
 	pub	fn black() -> Self{
-		Color::new(0.0, 0.0, 0.0)
+		Color::new(T::zero(), T::zero(), T::zero())
 	}
-	pub fn	clamp(&self, lower_bound: f64, upper_bound: f64) -> Color{
+	pub fn	clamp(&self, lower_bound: T, upper_bound: T) -> Color<T>{
 		Color::new(
 			self.red.min(upper_bound).max(lower_bound),
 			self.green.min(upper_bound).max(lower_bound),
@@ -25,7 +30,7 @@ impl	Color{
 	}
 }
 
-impl ops::Add<Self> for Color {
+impl<T: Float> Add for Color<T> {
 	type Output = Self;
 
 	fn add(self, other: Self) -> Self::Output {
@@ -37,7 +42,7 @@ impl ops::Add<Self> for Color {
 	}
 }
 
-impl ops::Sub<Self> for Color {
+impl<T: Float> Sub for Color<T> {
 	type Output = Self;
 
 	fn sub(self, other: Self) -> Self::Output {
@@ -49,20 +54,30 @@ impl ops::Sub<Self> for Color {
 	}
 }
 
-impl	ops::Mul<f64> for Color{
-	type Output = Self;
-	fn mul(self, other: f64) -> Self{
-		Color::new(
-			self.red * other,
-			self.green * other,
-			self.blue * other,
-		)
-	}
+impl<T, U> Mul<U> for Color<T>
+where
+  T: Float,
+  T: From<U>,
+  U: Num,
+{
+  type Output = Color<T>;
+
+  fn mul(self, other: U) -> Self::Output {
+    let multiplicator: T = other.into();
+    Color::new(
+      self.red * multiplicator,
+      self.green * multiplicator,
+      self.blue * multiplicator,
+    )
+  }
 }
 
-impl	ops::Mul<Color> for Color{
-	type Output = Color;
-	fn mul(self, other: Color) -> Self{
+impl<T>	Mul<Color<T>> for Color<T>
+where
+	T:Float
+{
+	type Output = Color<T>;
+	fn mul(self, other: Self) -> Self::Output{
 		Color::new(
 			self.red * other.red,
 			self.green * other.green,
@@ -71,7 +86,11 @@ impl	ops::Mul<Color> for Color{
 	}
 }
 
-impl PartialEq<Color> for Color {
+impl<T> PartialEq<Color<T>> for Color<T>
+where
+	T: Float,
+	T: FuzzyEq<T>,
+{
 	fn eq(&self, other: &Self) -> bool {
 		return self.red.fuzzy_eq(&other.red)
 		&& self.blue.fuzzy_eq(&other.blue)
