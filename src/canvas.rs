@@ -4,14 +4,15 @@ pub mod to_png;
 
 use std::vec::Vec;
 use num_traits::Float;
+// use num_traits::Num;
 use crate::color::Color;
 
 // use super::util::*;
 
-pub trait	Sized {
-	fn	width(&self) -> usize;
-	fn	height(&self) -> usize;
-}
+// pub trait	Sized {
+// 	fn	width(&self) -> usize;
+// 	fn	height(&self) -> usize;
+// }
 
 #[derive(Debug, Clone)]
 pub struct	Canvas<T = f64>
@@ -22,6 +23,21 @@ where
 	pub height : usize,
 
 	pixels: Vec<Color<T>>,
+}
+
+pub trait  Sized
+{
+	fn width(&self) -> usize;
+	fn height(&self) -> usize;	
+}
+
+impl<T: Float> Sized for Canvas<T> {
+	fn width(&self) -> usize {
+		self.width
+	}
+	fn height(&self)-> usize {
+		self.height
+	}
 }
 
 impl<T: Float> Canvas<T>{
@@ -47,10 +63,11 @@ impl<T: Float> Canvas<T>{
 #[cfg(test)]
 mod tests{
 	use super::*;
+	use super::to_ppm::ToPPM;
 	#[test]
 	fn	creating_canvas()
 	{
-		let can = Canvas::new(10, 20);
+		let can: Canvas = Canvas::new(10, 20);
 		assert_eq!(can.width, 10);
 		assert_eq!(can.height, 20);
 		for x in 0..can.width{
@@ -70,7 +87,7 @@ mod tests{
 	#[test]
 	fn	constructing_ppm_header()
 	{
-		let can = Canvas::new(5, 3);
+		let can: Canvas = Canvas::new(5, 3);
 		let ppm_image = can.to_ppm();
 		let actual_res = &ppm_image[..11];
 		// let ppm = canvas_to_ppm(can);

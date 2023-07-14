@@ -1,10 +1,10 @@
 extern crate rustic_rt as raytracer;
 
-
 use std::fs::write;
 use num_traits::Float;
 
 use raytracer::canvas::*;
+use raytracer::color::*;
 use raytracer::canvas::to_ppm::*;
 use raytracer::canvas::to_png::*;
 use raytracer::tuple::*;
