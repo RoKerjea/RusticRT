@@ -256,6 +256,54 @@ where
 		}
 		resmatrix
 	}
+	pub fn	translation(x: T, y:T, z: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[0][3] = x;
+		ident[1][3] = y;
+		ident[2][3] = z;
+		ident
+	}
+	pub fn	scaling(x: T, y:T, z: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[0][0] = x;
+		ident[1][1] = y;
+		ident[2][2] = z;
+		ident
+	}
+	pub fn	rotation_x(r: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[1][1] = r.cos();
+		ident[1][2] = -r.sin();
+		ident[2][1] = r.sin();
+		ident[2][2] = r.cos();
+		ident
+	}
+	pub fn	rotation_y(r: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[0][0] = r.cos();
+		ident[0][2] = r.sin();
+		ident[2][1] = -r.sin();
+		ident[2][2] = r.cos();
+		ident
+	}
+	pub fn	rotation_z(r: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[0][0] = r.cos();
+		ident[0][1] = -r.sin();
+		ident[1][0] = r.sin();
+		ident[1][1] = r.cos();
+		ident
+	}
+	pub fn	shearing(xy: T, xz: T, yx: T, yz: T, zx: T, zy: T) -> Self{
+		let mut ident = Matrix::identity();
+		ident[0][1] = xy;
+		ident[0][2] = xz;
+		ident[1][0] = yx;
+		ident[1][2] = yz;
+		ident[2][0] = zx;
+		ident[2][1] = zy;
+		ident
+	}
 }
 
 impl<T> Mul<Tuple<T>> for Matrix<T, 4>
@@ -276,6 +324,7 @@ where
 #[cfg(test)]
 mod tests{
 	use crate::tuple::Tuple;
+	use std::f64::consts::PI;
 	use super::*;
 	#[test]
 	fn	constructing_a_4fmatrix()
@@ -593,31 +642,192 @@ mod tests{
 		let expected_res = actual_res * matrix2.inverse();
 		assert!(expected_res.fuzzy_eq(&matrix1));
 	}
-	// #[test]
-	// fn	applying_translation_matrix_to_point()
-	// {
-	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
-	// 	let p = Tuple::point(-3.0, 4.0, 5.0);
-	// 	let expected = Tuple::point(2.0, 1.0, 7.0);
-	// 	let actual_res = p * matrix_translate;
-	// 	assert_eq!(actual_res, expected);
-	// }
-	// #[test]
-	// fn	applying_inverse_translation_matrix_to_point()
-	// {
-	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
-	// 	let p = Tuple::point(-3.0, 4.0, 5.0);
-	// 	let expected = Tuple::point(-8.0, 7.0, 3.0);
-	// 	let actual_res = p * matrix_translate.inverse();
-	// 	assert_eq!(actual_res, expected);
-	// }
-	// #[test]
-	// fn	translation_doesnt_work_on_vectors()
-	// {
-	// 	let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
-	// 	let p = Tuple::vector(-3.0, 4.0, 5.0);
-	// 	let expected = Tuple::vector(-3.0, 4.0, 5.0);
-	// 	let actual_res = p * matrix_translate;
-	// 	assert_eq!(actual_res, expected);
-	// }
+	#[test]
+	fn	applying_translation_matrix_to_point()
+	{
+		let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
+		let p = Tuple::point(-3.0, 4.0, 5.0);
+		let expected = Tuple::point(2.0, 1.0, 7.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn	applying_inverse_translation_matrix_to_point()
+	{
+		let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
+		let p = Tuple::point(-3.0, 4.0, 5.0);
+		let expected = Tuple::point(-8.0, 7.0, 3.0);
+		let actual_res = matrix_translate.inverse() * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn	translation_doesnt_work_on_vectors()
+	{
+		let matrix_translate = Matrix::translation(5.0, -3.0, 2.0);
+		let p = Tuple::vector(-3.0, 4.0, 5.0);
+		let expected = Tuple::vector(-3.0, 4.0, 5.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn scaling_a_point()
+	{
+		let matrix_translate = Matrix::scaling(2.0, 3.0, 4.0);
+		let p = Tuple::point(-4.0, 6.0, 8.0);
+		let expected = Tuple::point(-8.0, 18.0, 32.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn scaling_a_vector()
+	{
+		let matrix_translate = Matrix::scaling(2.0, 3.0, 4.0);
+		let p = Tuple::vector(-4.0, 6.0, 8.0);
+		let expected = Tuple::vector(-8.0, 18.0, 32.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn	applying_inverse_scaling_matrix_to_vector()
+	{
+		let matrix_translate = Matrix::scaling(2.0, 3.0, 4.0);
+		let p = Tuple::vector(-4.0, 6.0, 8.0);
+		let expected = Tuple::vector(-2.0, 2.0, 2.0);
+		let actual_res = matrix_translate.inverse() * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn reflection_is_scaling_by_negative()
+	{
+		let matrix_translate = Matrix::scaling(-1.0, 1.0, 1.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(-2.0, 3.0, 4.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn rotating_a_point_around_x_axis()
+	{
+		let half_quarter_matrix = Matrix::rotation_x(PI / 4.0);
+		let full_quarter_matrix = Matrix::rotation_x(PI / 2.0);
+		let p = Tuple::point(0.0, 1.0, 0.0);
+		let half_quarter_res = half_quarter_matrix * p;
+		let full_quarter_res = full_quarter_matrix * p;
+
+		let half_quarter = Tuple::point(0.0, (2.0).sqrt() / 2.0, (2.0).sqrt() / 2.0);
+		let full_quarter = Tuple::point(0.0, 0.0, 1.0);
+		assert_eq!(half_quarter_res, half_quarter);
+		assert_eq!(full_quarter_res, full_quarter);
+	}
+	#[test]
+	fn rotating_a_point_around_y_axis()
+	{
+		let half_quarter_matrix = Matrix::rotation_y(PI / 4.0);
+		let full_quarter_matrix = Matrix::rotation_y(PI / 2.0);
+		let p = Tuple::point(0.0, 0.0, 1.0);
+		let half_quarter_res = half_quarter_matrix * p;
+		let full_quarter_res = full_quarter_matrix * p;
+
+		let half_quarter = Tuple::point((2.0).sqrt() / 2.0, 0.0, (2.0).sqrt() / 2.0);
+		let full_quarter = Tuple::point(1.0, 0.0, 0.0);
+		assert_eq!(half_quarter_res, half_quarter);
+		assert_eq!(full_quarter_res, full_quarter);
+	}
+	#[test]
+	fn rotating_a_point_around_z_axis()
+	{
+		let half_quarter_matrix = Matrix::rotation_z(PI / 4.0);
+		let full_quarter_matrix = Matrix::rotation_z(PI / 2.0);
+		let p = Tuple::point(0.0, 1.0, 0.0);
+		let half_quarter_res = half_quarter_matrix * p;
+		let full_quarter_res = full_quarter_matrix * p;
+
+		let half_quarter = Tuple::point(-(2.0).sqrt() / 2.0, (2.0).sqrt() / 2.0, 0.0);
+		let full_quarter = Tuple::point(-1.0, 0.0, 0.0);
+		assert_eq!(half_quarter_res, half_quarter);
+		assert_eq!(full_quarter_res, full_quarter);
+	}
+	#[test]
+	fn shearing_x_in_proportion_of_y()
+	{
+		let matrix_translate = Matrix::shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(5.0, 3.0, 4.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn shearing_x_in_proportion_of_z()
+	{
+		let matrix_translate = Matrix::shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(6.0, 3.0, 4.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn shearing_y_in_proportion_of_x()
+	{
+		let matrix_translate = Matrix::shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(2.0, 5.0, 4.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn shearing_y_in_proportion_of_z()
+	{
+		let matrix_translate = Matrix::shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(2.0, 7.0, 4.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn shearing_z_in_proportion_of_x()
+	{
+		let matrix_translate = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(2.0, 3.0, 6.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn shearing_z_in_proportion_of_y()
+	{
+		let matrix_translate = Matrix::shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+		let p = Tuple::point(2.0, 3.0, 4.0);
+		let expected = Tuple::point(2.0, 3.0, 7.0);
+		let actual_res = matrix_translate * p;
+		assert_eq!(actual_res, expected);
+	}
+	#[test]
+	fn chaining_successives_transformations()
+	{
+		let a = Matrix::rotation_x(PI / 2.0);
+		let b = Matrix::scaling(5.0, 5.0 ,5.0);
+		let c = Matrix::translation(10.0, 5.0, 7.0);
+		let p = Tuple::point(1.0, 0.0, 1.0);
+		let expected_p2 = Tuple::point(1.0, -1.0, 0.0);
+		let expected_p3 = Tuple::point(5.0, -5.0, 0.0);
+		let expected_p4 = Tuple::point(15.0, 0.0, 7.0);
+		let p2 = a * p;
+		assert_eq!(expected_p2, p2);
+		let p3 = b * p2;
+		assert_eq!(expected_p3, p3);
+		let p4 = c * p3;
+		assert_eq!(expected_p4, p4);
+	}
+	#[test]
+	fn chaining_multiple_transformations_in_reverse_order()
+	{
+		let a = Matrix::rotation_x(PI / 2.0);
+		let b = Matrix::scaling(5.0, 5.0 ,5.0);
+		let c = Matrix::translation(10.0, 5.0, 7.0);
+		let p = Tuple::point(1.0, 0.0, 1.0);
+		let chain = c * b * a;
+		let expected_p = Tuple::point(15.0, 0.0, 7.0);
+		let p = chain * p;
+		assert_eq!(expected_p, p);
+	}
 }

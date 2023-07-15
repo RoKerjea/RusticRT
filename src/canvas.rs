@@ -28,7 +28,7 @@ where
 pub trait  Sized
 {
 	fn width(&self) -> usize;
-	fn height(&self) -> usize;	
+	fn height(&self) -> usize;
 }
 
 impl<T: Float> Sized for Canvas<T> {

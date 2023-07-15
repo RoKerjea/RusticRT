@@ -63,7 +63,6 @@ enum Pixel {
 	OutOfBound,
 }
 
-
 impl Pixel {
 	fn from_point_for_canvas<T>(point: Tuple<T>, canvas: &Canvas) -> Pixel
 	where
