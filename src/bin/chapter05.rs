@@ -5,11 +5,12 @@ use raytracer::color::Color;
 use raytracer::ray::Ray;
 use raytracer::sphere::Sphere;
 use raytracer::canvas::to_png::*;
-use raytracer::canvas::to_ppm::*;
+// use raytracer::canvas::to_ppm::*;
 use raytracer::canvas::*;
 use raytracer::tuple::*;
 
 use std::fs::write;
+use indicatif::ProgressBar;
 
 fn main(){
 	let ray_origin = Tuple::point(0.0, 0.0, -5.0);
@@ -23,6 +24,13 @@ fn main(){
 	let canvas_pixel_world_size = wall_size / WIDTH as f64;
 	let color = Color::new(1.0, 0.0, 0.0);
 	let sphere = Sphere::new(None);
+
+	println!(
+		"Raytracing {} pixels. Please be patient...", WIDTH * HEIGHT);
+
+	let progress = ProgressBar::new((WIDTH * HEIGHT) as u64);
+	progress.set_draw_rate(5);
+
 	for y in 0..HEIGHT {
 		for x in 0..WIDTH {
 			let ray_x = -half + (x as f64) * canvas_pixel_world_size;
@@ -34,14 +42,13 @@ fn main(){
 			if xs.hit() != None {
 				canvas.write_pixel(x, y, color);
 			}
+			progress.inc(1);
 		}
 	}
-	println!("Writing ./output.ppm");
-    let ppm = canvas.to_ppm();
-    write("./output2.ppm", ppm).expect("Could not write ouput.ppm to disk.");
-    println!("Writing ./output.png");
+	progress.finish();
+    println!("Writing ./output2.png");
     let png = canvas.to_png();
-    write("./output2.png", png).expect("Could not write ouput.png to disk.");
+    write("./output2.png", png).expect("Could not write ouput2.png to disk.");
 
     println!("Everything done.");
 }
