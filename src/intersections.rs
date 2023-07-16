@@ -42,7 +42,6 @@ impl Intersections {
 		}
 		None
 	}
-
 }
 
 impl From<Vec<Intersection>> for Intersections {
