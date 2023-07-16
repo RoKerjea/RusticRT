@@ -3,16 +3,16 @@ const EPSILON: f64 = 0.00001;
 
 //trait are kinda like interface class in c++?
 pub	trait	FuzzyEq<T> {
-	fn	fuzzy_eq(&self, other: &T) -> bool;
+	fn	fuzzy_eq(&self, other: T) -> bool;
 
-	fn	fuzzy_ne(&self, other: &T) -> bool{
+	fn	fuzzy_ne(&self, other: T) -> bool{
 		!self.fuzzy_eq(other)
 	}
 }
 
 impl FuzzyEq<f64> for f64 {
-    fn fuzzy_eq(&self, other: &f64) -> bool {
-        (*self - *other).abs() < EPSILON
+    fn fuzzy_eq(&self, other: f64) -> bool {
+        (*self - other).abs() < EPSILON
     }
 }
 

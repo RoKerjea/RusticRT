@@ -1,151 +1,139 @@
-use std::ops;
-use num_traits::Float;
+use crate::F;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use crate::fuzzy_eq::*;
 
 #[derive(Debug, Copy, Clone)]
-pub struct Tuple<T>
-where
-	T: Float,
-{
-	pub x : T,
-	pub y : T,
-	pub z : T,
-	pub w : T,
+pub struct Tuple {
+  pub x: F,
+  pub y: F,
+  pub z: F,
+  pub w: F,
 }
 
-impl<T> Tuple<T>
-where
-	T: Float,
-{
-	pub fn new(x: T, y: T, z: T, w: T) -> Self {
-        Self { x, y, z, w }
-    }
-	pub fn point(x: T, y: T, z: T) -> Self {
-        Self { x, y, z, w : T::one()}
-	}
-	pub fn vector(x: T, y: T, z: T) -> Self {
-        Self { x, y, z, w : T::zero()}
-	}
-	pub fn is_point(&self) -> bool {
-        self.w == T::one()
-    }
-    pub fn is_vector(&self) -> bool {
-        self.w == T::zero()
-    }
+/**
+ * Tuple type related functions
+ */
+impl Tuple {
+  pub fn new(x: F, y: F, z: F, w: F) -> Self {
+    Self { x, y, z, w }
+  }
+
+  pub fn point(x: F, y: F, z: F) -> Self {
+    Self { x, y, z, w: 1.0 }
+  }
+
+  pub fn vector(x: F, y: F, z: F) -> Self {
+    Self { x, y, z, w: 0.0 }
+  }
 }
 
-impl<T> PartialEq<Self> for Tuple<T>
-where
-	T: Float,
-    T: FuzzyEq<T>,
-{
+impl Tuple {
+  pub fn is_point(&self) -> bool {
+    self.w == 1.0
+  }
+
+  pub fn is_vector(&self) -> bool {
+    self.w == 0.0
+  }
+}
+
+impl PartialEq<Tuple> for Tuple {
 	fn eq(&self, other: &Self) -> bool {
-		return self.x.fuzzy_eq(&other.x)
-		&& self.y.fuzzy_eq(&other.y)
-		&& self.z.fuzzy_eq(&other.z)
-		&& self.w.fuzzy_eq(&other.w);
-	}
+		self.x.fuzzy_eq(other.x)
+		&& self.y.fuzzy_eq(other.y)
+		&& self.z.fuzzy_eq(other.z)
+		&& self.w.fuzzy_eq(other.w)
+  }
 }
 
-impl<T> Tuple<T>
-where
-	T: Float,
-{
-	pub fn magnitude(&self) -> T{
-		(self.x.powi(2) + self.y.powi(2)
-		+ self.z.powi(2) + self.w.powi(2)).sqrt()
-	}
-	pub fn normalize(&self) -> Tuple<T>{
-		*self / self.magnitude()
-	}
-	pub fn	dot(&self, other: &Self) -> T{
-		self.x * other.x +
-		self.y * other.y +
-		self.z * other.z +
-		self.w * other.w
-	}
-	pub fn	cross(&self, other: &Self) -> Self{
-		Tuple::new(
-			self.y * other.z - self.z * other.y,
-			self.z * other.x - self.x * other.z,
-			self.x * other.y - self.y * other.x,
-			T::zero(),
-		)
-	}
+impl Add<Self> for Tuple {
+  type Output = Self;
+
+  fn add(self, other: Self) -> Self::Output {
+    Tuple::new(
+      self.x + other.x,
+      self.y + other.y,
+      self.z + other.z,
+      self.w + other.w,
+    )
+  }
 }
 
-impl<T> ops::Add<Self> for Tuple<T>
-where
-	T: Float,
-{
-	type Output = Self;
-	fn add(self, other: Self) -> Self::Output {
-		Tuple::new(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z,
-            self.w + other.w,
-        )
-	}
+impl Sub<Self> for Tuple {
+  type Output = Self;
+
+  fn sub(self, other: Self) -> Self::Output {
+    Tuple::new(
+      self.x - other.x,
+      self.y - other.y,
+      self.z - other.z,
+      self.w - other.w,
+    )
+  }
 }
 
-impl<T> ops::Sub<Self> for Tuple<T>
-where
-	T: Float,
-{
-	type Output = Self;
-	fn sub(self, other: Self) -> Self{
-		Tuple::new(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z,
-            self.w - other.w,
-		)
-	}
-}
-impl<T> ops::Mul<T> for Tuple<T>
-where
-	T: Float,
-{
-	type Output = Self;
-	fn mul(self, other: T) -> Self{
-		Tuple::new(
-            self.x * other,
-            self.y * other,
-            self.z * other,
-            self.w * other,
-		)
-	}
-}
-impl<T> ops::Div<T> for Tuple<T>
-where
-	T: Float,
-{
-	type Output = Self;
-	fn div(self, other: T) -> Self{
-		Tuple::new(
-            self.x / other,
-            self.y / other,
-            self.z / other,
-            self.w / other,
-		)
-	}
+impl Neg for Tuple {
+  type Output = Self;
+
+  fn neg(self) -> Self::Output {
+    Tuple::new(-self.x, -self.y, -self.z, -self.w)
+  }
 }
 
-impl<T> ops::Neg for Tuple<T>
-where
-	T: Float,
-{
-	type Output = Self;
-	fn neg(self) -> Self{
-		Tuple::new(
-            -self.x,
-            -self.y,
-            -self.z,
-        	-self.w,
-		)
-	}
+impl Mul<F> for Tuple {
+  type Output = Self;
+
+  fn mul(self, other: F) -> Self::Output {
+    Tuple::new(
+      self.x * other,
+      self.y * other,
+      self.z * other,
+      self.w * other,
+    )
+  }
+}
+
+impl Div<F> for Tuple {
+  type Output = Self;
+
+  fn div(self, other: F) -> Self::Output {
+    Tuple::new(
+      self.x / other,
+      self.y / other,
+      self.z / other,
+      self.w / other,
+    )
+  }
+}
+
+/**
+* Tuple math operations
+*/
+impl Tuple {
+  pub fn magnitude(&self) -> F {
+    (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
+  }
+
+  pub fn normalize(&self) -> Self {
+    *self / self.magnitude()
+  }
+
+  pub fn dot(&self, other: Tuple) -> F {
+    self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+  }
+
+  pub fn cross(&self, other: Tuple) -> Tuple {
+    if !self.is_vector() || !other.is_vector() {
+      panic!("Cross product can only be calculated for two vectors.");
+    }
+
+    Tuple::vector(
+      self.y * other.z - self.z * other.y,
+      self.z * other.x - self.x * other.z,
+      self.x * other.y - self.y * other.x,
+    )
+  }
 }
 
 #[cfg(test)]
@@ -306,7 +294,7 @@ mod	tests {
 	{
 		let vec1 = Tuple::vector(1.0, 2.0, 3.0);
 		let vec2 = Tuple::vector(2.0, 3.0, 4.0);
-		assert_eq!(vec1.dot(&vec2), 20.0);
+		assert_eq!(vec1.dot(vec2), 20.0);
 	}
 	#[test]
 	fn	cross_product_tuples()
@@ -315,7 +303,7 @@ mod	tests {
 		let vec2 = Tuple::vector(2.0, 3.0, 4.0);
 		let expect1 = Tuple::vector(-1.0, 2.0, -1.0);
 		let expect2 = Tuple::vector(1.0, -2.0, 1.0);
-		assert_eq!(vec1.cross(&vec2), expect1);
-		assert_eq!(vec2.cross(&vec1), expect2);
+		assert_eq!(vec1.cross(vec2), expect1);
+		assert_eq!(vec2.cross(vec1), expect2);
 	}
 }

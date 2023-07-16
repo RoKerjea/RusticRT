@@ -92,9 +92,9 @@ where
 	T: FuzzyEq<T>,
 {
 	fn eq(&self, other: &Self) -> bool {
-		return self.red.fuzzy_eq(&other.red)
-		&& self.blue.fuzzy_eq(&other.blue)
-		&& self.green.fuzzy_eq(&other.green)
+		return self.red.fuzzy_eq(other.red)
+		&& self.blue.fuzzy_eq(other.blue)
+		&& self.green.fuzzy_eq(other.green)
 	}
 }
 

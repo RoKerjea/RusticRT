@@ -1,65 +1,60 @@
 //external crates
-use num_traits::Float;
+
+use crate::F;
 use std::convert::From;
-use std::ops::{Index, IndexMut, Mul, AddAssign};
+use std::ops::{Index, IndexMut, Mul};
 //my crates
 use crate::fuzzy_eq::*;
 use crate::tuple::*;
 
-#[derive(Debug, Copy, Clone)]
-pub struct Matrix<T, const D: usize>
-where
-	T: Float,
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Matrix< const D: usize>
 {
-	data: [[T; D]; D],
+	data: [[F; D]; D],
 }
 
-impl<T, const D: usize> From<[[T; D]; D]> for Matrix<T, D>
-where
-	T: Float,
+impl<const D: usize> From<[[F; D]; D]> for Matrix<D>
 {
-	fn from(data: [[T; D]; D]) -> Self {
+	fn from(data: [[F; D]; D]) -> Self {
 		Matrix { data }
 	}
 }
 
 //Generic universal implementation for all matrixes
-impl<T, const D: usize> Matrix<T, D>
-where
-	T: Float,
-{
-	pub fn new() -> Matrix<T, D> {
-		Matrix::from([[T::zero(); D]; D])
-	}
-	pub fn diagonal(value: T) -> Matrix<T, D> {
-		let mut res:Matrix<T, D> = Matrix::new();
-		for i in 0..D {
-			res[i][i] = value;
-		}
-		res
-	}
-	pub fn identity() -> Matrix<T, D> {
-		Matrix::diagonal(T::one())
-	}
-	pub fn transpose(&self) -> Matrix<T, D> {
-		let mut res = Matrix::new();
-		for row in 0..D {
-			for col in 0..D{
-				res[col][row] = self[row][col];
-			}
-		}
-		res
-	}
-}
 
-impl<T, const D: usize> Mul<Self> for Matrix<T, D>
-where
-	T: Float,
-	T: AddAssign,
+impl<const D: usize> Matrix<D> {
+	pub fn new() -> Matrix<D> {
+	  Matrix::from([[0.0; D]; D])
+	}
+  
+	pub fn diagonal(value: F) -> Matrix<D> {
+	  let mut matrix = Matrix::new();
+	  for i in 0..D {
+		matrix[i][i] = value;
+	  }
+	  matrix
+	}
+  
+	pub fn identity() -> Matrix<D> {
+	  Matrix::diagonal(1.0)
+	}
+  
+	pub fn transpose(&self) -> Matrix<D> {
+	  let mut matrix = Matrix::new();
+	  for row in 0..D {
+		for column in 0..D {
+		  matrix[column][row] = self.data[row][column];
+		}
+	  }
+	  matrix
+	}
+  }
+
+impl<const D: usize> Mul<Self> for Matrix<D>
 {
 	type Output = Self;
 	fn mul(self, other: Self) -> Self::Output{
-		let mut res:Matrix<T, D> = Matrix::new();
+		let mut res:Matrix<D> = Matrix::new();
 		for row in 0..D {
 			for column in 0..D  {
 				for i in 0..D {
@@ -70,38 +65,29 @@ where
 		res
 	}
 }
-impl<T, const D: usize> Index<usize> for Matrix<T, D>
-where
-	T: Float,
-{
-	type Output = [T; D];
-
+impl<const D: usize> Index<usize> for Matrix<D> {
+	type Output = [F; D];
+  
 	fn index(&self, index: usize) -> &Self::Output {
-		&self.data[index]
+	  &self.data[index]
 	}
-}
+  }
 
-impl<T, const D: usize> IndexMut<usize> for Matrix<T, D>
-where
-	T: Float,
-{
+  impl<const D: usize> IndexMut<usize> for Matrix<D> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		&mut self.data[index]
+	  &mut self.data[index]
 	}
-}
+  }
 
 //TODO: implement this operation as a '==' oveload
 //it's totally possible to do that and would be much better to use
 //not doing that for now because deviating too far from example is risky
-impl<T, const D: usize> FuzzyEq<Self> for Matrix<T, D>
-where
-	T: Float,
-	T: FuzzyEq<T>,
+impl<const D: usize> FuzzyEq<Self> for Matrix<D>
 {
-	fn fuzzy_eq(&self, other: &Self) -> bool {
+	fn fuzzy_eq(&self, other: Self) -> bool {
 		for row in 0..D {
 			for col in 0..D{
-				if !self[row][col].fuzzy_eq(&other[row][col])
+				if !self[row][col].fuzzy_eq(other[row][col])
 				{
 					return false;
 				}
@@ -111,18 +97,14 @@ where
 	}
 }
 
-impl<T> Matrix<T, 2>
-where
-	T: Float,
+impl Matrix<2>
 {
-	pub	fn determinant(&self) -> T {
+	pub	fn determinant(&self) -> F {
 		self[0][0] * self[1][1] - self[0][1] * self[1][0]
 	}
 }
 
-impl<T> Matrix<T, 3>
-where
-	T: Float,
+impl Matrix<3>
 {
 	//@TODO Big refacto here, it's actually worse than what I improvised in C
 	//for MiniRT, and that was already not very pretty
@@ -151,9 +133,9 @@ where
 	// }
 	//Absolutly dreadful, very excited to be able to refacto that
 	//still can't deviate too much from example
-	pub fn submatrix(&self, row: usize, column: usize) -> Matrix<T, 2>
+	pub fn submatrix(&self, row: usize, column: usize) -> Matrix<2>
 	{
-		let mut m: Matrix<T, 2> = Matrix::new();
+		let mut m: Matrix<2> = Matrix::new();
 		let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
 		while sub_row < 2 {
 			if self_row == row {
@@ -177,28 +159,26 @@ where
 		}
 		return m;
 	}
-	pub fn minor(&self, row: usize, column: usize) -> T {
+	pub fn minor(&self, row: usize, column: usize) -> F {
 		self.submatrix(row, column).determinant()
 	}
-	pub	fn cofactor(&self, row: usize, column: usize) -> T {
+	pub	fn cofactor(&self, row: usize, column: usize) -> F {
 		let res = self.minor(row, column);
 		if (row + column) % 2 != 0{
 			return -res;
 		}
 		return res;
 	}
-	pub fn determinant(&self) -> T {
+	pub fn determinant(&self) -> F {
 		return 	self[0][0] * self.cofactor(0, 0)
 				+ self[0][1] * self.cofactor(0, 1)
 				+ self[0][2] * self.cofactor(0, 2);
 	}
 }
 
-impl<T> Matrix<T, 4>
-where
-	T: Float,
+impl Matrix<4>
 {
-	pub fn submatrix(&self, row: usize, column: usize) -> Matrix<T, 3> {
+	pub fn submatrix(&self, row: usize, column: usize) -> Matrix<3> {
 		let mut m = Matrix::new();
 		let [mut self_row, mut self_col, mut sub_row, mut sub_col] = [0; 4];
 		while sub_row < 3 {
@@ -223,17 +203,17 @@ where
 		}
 		return m;
 	}
-	pub fn minor(&self, row: usize, column: usize) -> T {
+	pub fn minor(&self, row: usize, column: usize) -> F {
 		self.submatrix(row, column).determinant()
 	}
-	pub	fn cofactor(&self, row: usize, column: usize) -> T {
+	pub	fn cofactor(&self, row: usize, column: usize) -> F {
 		let res = self.minor(row, column);
 		if (row + column) % 2 != 0{
 			return -res;
 		}
 		return res;
 	}
-	pub fn determinant(&self) -> T {
+	pub fn determinant(&self) -> F {
 		return 	self[0][0] * self.cofactor(0, 0)
 				+ self[0][1] * self.cofactor(0, 1)
 				+ self[0][2] * self.cofactor(0, 2)
@@ -241,7 +221,7 @@ where
 
 	}
 	pub	fn	invertible(&self) -> bool {
-		if self.determinant().is_zero() {
+		if self.determinant() == 0.0 {
 			return false;
 		}
 		return true;
@@ -256,21 +236,21 @@ where
 		}
 		resmatrix
 	}
-	pub fn	translation(x: T, y:T, z: T) -> Self{
+	pub fn	translation(x: F, y: F, z: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[0][3] = x;
 		ident[1][3] = y;
 		ident[2][3] = z;
 		ident
 	}
-	pub fn	scaling(x: T, y:T, z: T) -> Self{
+	pub fn	scaling(x: F, y: F, z: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[0][0] = x;
 		ident[1][1] = y;
 		ident[2][2] = z;
 		ident
 	}
-	pub fn	rotation_x(r: T) -> Self{
+	pub fn	rotation_x(r: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[1][1] = r.cos();
 		ident[1][2] = -r.sin();
@@ -278,7 +258,7 @@ where
 		ident[2][2] = r.cos();
 		ident
 	}
-	pub fn	rotation_y(r: T) -> Self{
+	pub fn	rotation_y(r: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[0][0] = r.cos();
 		ident[0][2] = r.sin();
@@ -286,7 +266,7 @@ where
 		ident[2][2] = r.cos();
 		ident
 	}
-	pub fn	rotation_z(r: T) -> Self{
+	pub fn	rotation_z(r: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[0][0] = r.cos();
 		ident[0][1] = -r.sin();
@@ -294,7 +274,7 @@ where
 		ident[1][1] = r.cos();
 		ident
 	}
-	pub fn	shearing(xy: T, xz: T, yx: T, yz: T, zx: T, zy: T) -> Self{
+	pub fn	shearing(xy: F, xz: F, yx: F, yz: F, zx: F, zy: F) -> Self{
 		let mut ident = Matrix::identity();
 		ident[0][1] = xy;
 		ident[0][2] = xz;
@@ -306,12 +286,10 @@ where
 	}
 }
 
-impl<T> Mul<Tuple<T>> for Matrix<T, 4>
-where
-	T: Float,
+impl Mul<Tuple> for Matrix<4>
 {
-	type Output = Tuple<T>;
-	fn mul(self, other: Tuple<T>) -> Self::Output {
+	type Output = Tuple;
+	fn mul(self, other: Tuple) -> Self::Output {
 		Tuple::new(
 			self[0][0] * other.x + self[0][1] * other.y + self[0][2] * other.z + self[0][3] * other.w,
 			self[1][0] * other.x + self[1][1] * other.y + self[1][2] * other.z + self[1][3] * other.w,
@@ -325,6 +303,7 @@ where
 mod tests{
 	use crate::tuple::Tuple;
 	use std::f64::consts::PI;
+	use num_traits::Float;
 	use super::*;
 	#[test]
 	fn	constructing_a_4fmatrix()
@@ -377,7 +356,7 @@ mod tests{
 			[5.5, 6.5, 7.5, 8.5],
 			[9.0, 10.0, 11.0, 12.0],
 			[13.5, 14.5, 15.5, 16.5],]);
-		assert!(matrix1.fuzzy_eq(&matrix2));
+		assert!(matrix1.fuzzy_eq(matrix2));
 	}
 	#[test]
 	fn	comparing_4fmatrixes_false()
@@ -392,7 +371,7 @@ mod tests{
 			[5.5, 6.5, 7.5, 8.5],
 			[9.0, 10.0, 11.0, 12.0],
 			[13.5, 14.5, 15.5, 1.5],]);
-		assert!(!matrix1.fuzzy_eq(&matrix2));
+		assert!(!matrix1.fuzzy_eq(matrix2));
 	}
 	#[test]
 	fn	comparing_3fmatrixes_true(){
@@ -404,7 +383,7 @@ mod tests{
 			[-3.0, 5.0, 0.0],
 			[1.0, -2.0, -7.0],
 			[0.0, 1.0, 1.0],]);
-		assert!(matrix1.fuzzy_eq(&matrix2));
+		assert!(matrix1.fuzzy_eq(matrix2));
 	}
 	#[test]
 	fn	comparing_2fmatrixes_true(){
@@ -414,7 +393,7 @@ mod tests{
 		let matrix2 = Matrix::from([
 			[-3.0, 5.0],
 			[1.0, -2.0],]);
-		assert!(matrix1.fuzzy_eq(&matrix2));
+		assert!(matrix1.fuzzy_eq(matrix2));
 	}
 	#[test]
 	fn	multiplying_4f_matrixes()
@@ -435,7 +414,7 @@ mod tests{
 			[40.0, 58.0, 110.0, 102.0],
 			[16.0, 26.0, 46.0, 42.0],]);
 		let actual_result = matrix1 * matrix2;
-		assert!(actual_result.fuzzy_eq(&expected));
+		assert!(actual_result.fuzzy_eq(expected));
 	}
 	#[test]
 	fn	multiplying_4f_matrixes_by_identity_matrix()
@@ -448,7 +427,7 @@ mod tests{
 		let identitym = Matrix::identity();
 
 		let actual_res = matrix1 * identitym;
-		assert!(actual_res.fuzzy_eq(&matrix1));
+		assert!(actual_res.fuzzy_eq(matrix1));
 	}
 	#[test]
 	fn	multiplying_4f_matrixes_by_tuple()
@@ -460,7 +439,7 @@ mod tests{
 			[0.0, 0.0, 0.0, 1.0],]);
 		let tuplearg = Tuple::point(1.0, 2.0, 3.0);
 
-		let actual_res:Tuple<f64> = matrix1 * tuplearg;
+		let actual_res:Tuple = matrix1 * tuplearg;
 		let expected = Tuple::point(18.0, 24.0, 33.0);
 		assert_eq!(actual_res, expected);
 	}
@@ -478,7 +457,7 @@ mod tests{
 			[3.0, 0.0, 5.0, 5.0],
 			[0.0, 8.0, 3.0, 8.0],]);
 		let actual_res = matrix1.transpose();
-		assert!(actual_res.fuzzy_eq(&expected));
+		assert!(actual_res.fuzzy_eq(expected));
 	}
 	#[test]
 	fn	determinant_of_a_2f_matrix()
@@ -500,7 +479,7 @@ mod tests{
 			[-3.0, 2.0],
 			[0.0, 6.0],]);
 		let	actual_res = matrix1.submatrix(0, 2);
-		assert!(actual_res.fuzzy_eq(&expected_res));
+		assert!(actual_res.fuzzy_eq(expected_res));
 	}
 	#[test]
 	fn	submatrix_of_matrix4f()
@@ -515,7 +494,7 @@ mod tests{
 			[-8.0, 8.0, 6.0],
 			[-7.0, -1.0, 1.0],]);
 		let	actual_res = matrix1.submatrix(2, 1);
-		assert!(actual_res.fuzzy_eq(&expected_res));
+		assert!(actual_res.fuzzy_eq(expected_res));
 	}
 	#[test]
 	fn	minor_of_matrix3f()
@@ -594,7 +573,7 @@ mod tests{
 		assert_eq!(matrix1.cofactor(2, 3), -160.0);
 		assert_eq!(matrix1.cofactor(3, 2), 105.0);
 		assert_eq!(matrix1.determinant(), 532.0);
-		assert!(actual_res.fuzzy_eq(&expected_res));
+		assert!(actual_res.fuzzy_eq(expected_res));
 	}
 	#[test]
 	fn	matrix4f_inversion2() {
@@ -609,7 +588,7 @@ mod tests{
 			[0.35897, 0.35897, 0.43590, 0.92308],
 			[-0.69231, -0.69231, -0.76923, -1.92308],]);
 		let	actual_res = matrix1.inverse();
-		assert!(actual_res.fuzzy_eq(&expected_res));
+		assert!(actual_res.fuzzy_eq(expected_res));
 	}
 	#[test]
 	fn	matrix4f_inversion3() {
@@ -624,7 +603,7 @@ mod tests{
 			[-0.02901, -0.14630, -0.10926, 0.12963],
 			[0.17778, 0.06667, -0.26667, 0.33333],]);
 		let	actual_res = matrix1.inverse();
-		assert!(actual_res.fuzzy_eq(&expected_res));
+		assert!(actual_res.fuzzy_eq(expected_res));
 	}
 	#[test]
 	fn	matrix4f_inversion4() {
@@ -640,7 +619,7 @@ mod tests{
 			[6.0, -2.0, 0.0, 5.0],]);
 		let	actual_res = matrix1 * matrix2;
 		let expected_res = actual_res * matrix2.inverse();
-		assert!(expected_res.fuzzy_eq(&matrix1));
+		assert!(expected_res.fuzzy_eq(matrix1));
 	}
 	#[test]
 	fn	applying_translation_matrix_to_point()

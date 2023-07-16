@@ -1,48 +1,37 @@
 extern crate rustic_rt as raytracer;
 
 // use super::util::*;
-use num_traits::Float;
 use raytracer::tuple::*;
 
 #[derive(Debug)]
-struct Environment<T>
-where
-	T: Float,
+struct Environment
 {
-    gravity: Tuple<T>,
-    wind: Tuple<T>,
+    gravity: Tuple,
+    wind: Tuple,
 }
 
 #[derive(Debug)]
-struct Projectile<T>
-where
-	T: Float,
+struct Projectile
 {
-    position: Tuple<T>,
-    velocity: Tuple<T>,
+    position: Tuple,
+    velocity: Tuple,
 }
 
-impl<T> Projectile<T>
-where
-	T: Float,
+impl Projectile
 {
-    pub fn new(position: Tuple<T>, velocity: Tuple<T>) -> Self {
+    pub fn new(position: Tuple, velocity: Tuple) -> Self {
         Projectile { position, velocity }
     }
 }
 
-impl<T> Environment<T>
-where
-	T: Float,
+impl Environment
 {
-    pub fn new(gravity: Tuple<T>, wind: Tuple<T>) -> Self {
+    pub fn new(gravity: Tuple, wind: Tuple) -> Self {
         Environment { gravity, wind }
     }
 }
 
-fn tick<T>(environment: &Environment<T>, projectile: &Projectile<T>) -> Projectile<T>
-where
-	T: Float,
+fn tick(environment: &Environment, projectile: &Projectile) -> Projectile
 {
     Projectile::new(
         projectile.position + projectile.velocity,

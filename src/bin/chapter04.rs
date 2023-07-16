@@ -1,7 +1,6 @@
 extern crate rustic_rt as raytracer;
 
-use num_traits::Float;
-use raytracer::canvas;
+// use raytracer::canvas;
 use raytracer::color::Color;
 use std::f64::consts::PI;
 use std::fs::write;
@@ -12,21 +11,17 @@ use raytracer::canvas::to_ppm::*;
 use raytracer::canvas::*;
 use raytracer::tuple::*;
 
-enum Pixel<T> {
+enum Pixel {
 	Coordinate{
 		x: usize,
 		y: usize,
 	},
-	OutOfBounds {x: T, y: T},
+	OutOfBounds {x: f64, y: f64},
 }
 
-impl<T> Pixel<T>
-where
-	T: Float,
+impl Pixel
 {
-	fn from_point_for_canvas(point: Tuple<T>, canvas: &Canvas) -> Pixel<T>
-	where
-		T: Float,
+	fn from_point_for_canvas(point: Tuple, canvas: &Canvas) -> Pixel
 	{
 		if !point.is_point() {
 			panic!("Given tuple is not point. Point is needed to conversion for screen space.");
@@ -35,8 +30,8 @@ where
 		let rx = point.x.round();
 		let ry = point.y.round();
 
-		let ux = rx.to_usize().unwrap();
-        let uy = ry.to_usize().unwrap();
+		let ux = rx as usize;
+        let uy = ry as usize;
 
 		if rx.is_sign_negative() || ry.is_sign_negative() || ux >= canvas.width || uy >= canvas.height{
 			return Pixel::OutOfBounds{ x: rx, y: ry };
