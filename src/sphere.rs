@@ -42,11 +42,15 @@ impl Intersectable for Sphere{
 			])
 		}
   	}
+	fn normal_at(&self, point: Tuple) -> Tuple {
+		(point - Tuple::new(0.0, 0.0, 0.0, 1.0)).normalize()
+	}
 }
 
 #[cfg(test)]
 mod tests{
 	use crate::fuzzy_eq::FuzzyEq;
+	use crate::F;
 	use super::*;
     // use crate::{tuple::Tuple, matrix::Matrix};
 	#[test]
@@ -157,4 +161,42 @@ mod tests{
 // 		let xs = Intersections::new(Vec![i2, i1]);
 // 		assert_eq!(xs.hit(), Some(i1));
 // 	}
+	#[test]
+	fn the_normal_at_a_sphere_x_axis()
+	{
+		let s = Sphere::new(None);
+		let n = s.normal_at(Tuple::point(1.0, 0.0, 0.0));
+		
+		let expected = Tuple::vector(1.0, 0.0, 0.0);
+		assert_eq!(n, expected);
+	}
+	#[test]
+	fn the_normal_at_a_sphere_y_axis()
+	{
+		let s = Sphere::new(None);
+		let n = s.normal_at(Tuple::point(0.0, 1.0, 0.0));
+		
+		let expected = Tuple::vector(0.0, 1.0, 0.0);
+		assert_eq!(n, expected);
+	}
+	#[test]
+	fn the_normal_at_a_sphere_z_axis()
+	{
+		let s = Sphere::new(None);
+		let n = s.normal_at(Tuple::point(0.0, 0.0, 1.0));
+		
+		let expected = Tuple::vector(0.0, 0.0, 1.0);
+		assert_eq!(n, expected);
+	}
+	#[test]
+	fn the_normal_at_a_sphere_nonaxial_point()
+	{
+		let sqrt3 = (3.0 as F).sqrt() / 3.0;
+		let s = Sphere::new(None);
+		let n = s.normal_at(Tuple::point(sqrt3, sqrt3,sqrt3));
+		
+		let expected = Tuple::vector(sqrt3, sqrt3,sqrt3);
+		assert_eq!(n, expected);
+		assert_eq!(n, n.normalize());
+	}
 }
