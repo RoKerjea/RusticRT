@@ -43,13 +43,18 @@ impl Intersectable for Sphere{
 		}
   	}
 	fn normal_at(&self, point: Tuple) -> Tuple {
-		(point - Tuple::new(0.0, 0.0, 0.0, 1.0)).normalize()
+		let object_point = self.transform.inverse() * point;
+		let object_normal = (object_point - Tuple::new(0.0, 0.0, 0.0, 1.0)).normalize();
+		let mut world_normal = self.transform.inverse().transpose() * object_normal;
+		world_normal.w = 0.0;
+		world_normal.normalize()
 	}
 }
 
 #[cfg(test)]
 mod tests{
 	use crate::fuzzy_eq::FuzzyEq;
+	use std::f64::consts::PI;
 	use crate::F;
 	use super::*;
     // use crate::{tuple::Tuple, matrix::Matrix};
@@ -198,5 +203,23 @@ mod tests{
 		let expected = Tuple::vector(sqrt3, sqrt3,sqrt3);
 		assert_eq!(n, expected);
 		assert_eq!(n, n.normalize());
+	}
+
+	#[test]
+	fn	normal_of_translated_sphere(){
+		let t = Matrix::translation(0.0, 1.0, 0.0);
+		let s = Sphere::new(Some(t));
+		let n = s.normal_at(Tuple::point(0.0, 1.70711, -0.70711));
+		let expected = Tuple::vector(0.0, 0.70711, -0.70711);
+		assert_eq!(n, expected);
+	}
+	#[test]
+	fn	normal_of_transformed_sphere(){
+		let sqrt2 = (2.0 as F).sqrt() / 2.0;
+		let t = Matrix::scaling(1.0, 0.5, 1.0) * Matrix::rotation_z(PI / 5.0);
+		let s = Sphere::new(Some(t));
+		let n = s.normal_at(Tuple::point(0.0, sqrt2, -sqrt2));
+		let expected = Tuple::vector(0.0, 0.97014, -0.24254);
+		assert_eq!(n, expected);
 	}
 }

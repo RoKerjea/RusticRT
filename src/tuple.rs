@@ -134,6 +134,9 @@ impl Tuple {
       self.x * other.y - self.y * other.x,
     )
   }
+  pub fn reflect(&self, other: Tuple) -> Tuple {
+	*self - other * 2.0 * self.dot(other)
+  }
 }
 
 #[cfg(test)]
@@ -305,5 +308,24 @@ mod	tests {
 		let expect2 = Tuple::vector(1.0, -2.0, 1.0);
 		assert_eq!(vec1.cross(vec2), expect1);
 		assert_eq!(vec2.cross(vec1), expect2);
+	}
+	#[test]
+	fn	reflecting_45_degree_vector()
+	{
+		let v = Tuple::vector(1.0, -1.0, 0.0);
+		let n = Tuple::vector(0.0, 1.0, 0.0);
+		let res = v.reflect(n);
+		let expected = Tuple::vector(1.0, 1.0, 0.0);
+		assert_eq!(res, expected);
+	}
+	#[test]
+	fn	reflecting_vector_off_slanted_surface()
+	{
+		let sqrt2 = (2.0 as F).sqrt() / 2.0;
+		let v = Tuple::vector(0.0, -1.0, 0.0);
+		let n = Tuple::vector(sqrt2, sqrt2, 0.0);
+		let res = v.reflect(n);
+		let expected = Tuple::vector(1.0, 0.0, 0.0);
+		assert_eq!(res, expected);
 	}
 }
