@@ -3,10 +3,12 @@ use crate::ray::*;
 use crate::body::*;
 use crate::intersections::*;
 use crate::tuple::*;
+use crate::material::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Sphere {
 	pub transform: Matrix<4>,
+	pub material: Material,
 }
 
 impl Sphere {
@@ -14,8 +16,11 @@ impl Sphere {
     	match transform {
       		None => Sphere{
         		transform: Matrix::identity(),
+				material: Material::default(),
       		},
-      		Some(transform) => Sphere { transform },
+      		Some(transform) => Sphere {
+				transform,
+				material: Material::default(), },
     	}
   	}
 }
@@ -56,6 +61,7 @@ mod tests{
 	use crate::fuzzy_eq::FuzzyEq;
 	use std::f64::consts::PI;
 	use crate::F;
+	use crate::color::*;
 	use super::*;
     // use crate::{tuple::Tuple, matrix::Matrix};
 	#[test]
@@ -221,5 +227,26 @@ mod tests{
 		let n = s.normal_at(Tuple::point(0.0, sqrt2, -sqrt2));
 		let expected = Tuple::vector(0.0, 0.97014, -0.24254);
 		assert_eq!(n, expected);
+	}
+	#[test]
+	fn sphere_has_default_material(){
+		let s = Sphere::new(None);
+		let m = Material::default();
+		
+		assert_eq!(s.material, m);
+	}
+	#[test]
+	fn sphere_may_be_assigned_material(){
+		let mut s = Sphere::new(None);
+		let m = Material::from(Phong::new(
+			Color::new(1.0, 1.0, 0.0),
+			0.05,
+			0.7,
+			0.95,
+			400.0,
+		  ));
+		s.material = m;
+		
+		assert_eq!(s.material, m);
 	}
 }

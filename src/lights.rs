@@ -1,7 +1,7 @@
 use crate::tuple::*;
 use crate::color::*;
 
-struct PointLight {
+pub struct PointLight {
     pub position: Tuple,
     pub intensity: Color,
 }
@@ -17,7 +17,9 @@ impl PointLight{
 
 #[cfg(test)]
 mod tests{
-	// use crate::fuzzy_eq::FuzzyEq;
+	use crate::material::Material;
+
+// use crate::fuzzy_eq::FuzzyEq;
 	use super::*;
 
 	#[test]
