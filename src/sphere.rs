@@ -23,6 +23,11 @@ impl Sphere {
 				material: Material::default(), },
     	}
   	}
+	pub fn with_material(material: Material, transform: Option<Matrix<4>>) -> Self {
+		let mut s = Self::new(transform);
+		s.material = material;
+		s
+	}
 }
 
 impl Intersectable for Sphere{
@@ -232,12 +237,11 @@ mod tests{
 	fn sphere_has_default_material(){
 		let s = Sphere::new(None);
 		let m = Material::default();
-		
+
 		assert_eq!(s.material, m);
 	}
 	#[test]
 	fn sphere_may_be_assigned_material(){
-		let mut s = Sphere::new(None);
 		let m = Material::from(Phong::new(
 			Color::new(1.0, 1.0, 0.0),
 			0.05,
@@ -245,8 +249,9 @@ mod tests{
 			0.95,
 			400.0,
 		  ));
-		s.material = m;
-		
+
+		let s = Sphere::with_material(m, None);
+
 		assert_eq!(s.material, m);
 	}
 }
