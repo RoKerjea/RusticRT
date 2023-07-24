@@ -42,7 +42,6 @@ fn main(){
 	.par_bridge()
 	.for_each(|(x, y)|
 	{
-
 		let ray_x = -half + (x as f64) * canvas_pixel_world_size;
 		let ray_y = half - (y as f64) * canvas_pixel_world_size;
 		let wall_point = Tuple::point(ray_x, ray_y, wall_position);
@@ -50,10 +49,8 @@ fn main(){
 		let xs = sphere.intersect(ray);
 		let hit = xs.hit();
 		if let Some(hit) = hit {
-			let position = ray.position(hit.t);
-			let normalv = hit.body.normal_at(position);
-			let eyev = -ray.direction;
-			let color = hit.body.material().lighting(light, position, eyev, normalv);
+			let computed = hit.get_computed();
+			let color = hit.body.material().lighting(light, computed.point, computed.eyev, computed.normalv);
 			let mut canvas = canvas_mutex.lock().unwrap();
 			canvas.write_pixel(x, y, color);
 		}

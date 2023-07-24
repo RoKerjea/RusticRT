@@ -51,7 +51,9 @@ mod tests{
 	fn	intersection_encapsulate_t_and_body()
 	{
 		let s = Sphere::new(None);
-		let i = Intersection::new(3.5, Body::from(s));
+
+		let r = Ray::new(Tuple::point(1.0, 1.0, 1.0), Tuple::vector(0.0, 0.0, 1.0));
+		let i = Intersection::new(3.5, r, Body::from(s));
 		assert_eq!(i.t, 3.5);
 		assert_eq!(i.body, Body::from(s));
 	}

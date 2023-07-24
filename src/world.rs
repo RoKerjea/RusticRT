@@ -1,10 +1,8 @@
+use crate::color::Color;
 use crate::lights::PointLight;
-use crate::matrix::*;
 use crate::ray::*;
 use crate::body::*;
 use crate::intersections::*;
-use crate::sphere::Sphere;
-use crate::tuple::*;
 use crate::material::*;
 
 pub struct World {
@@ -25,6 +23,18 @@ impl World {
 		let xs = self.bodies.iter().flat_map(|body| body.intersect(ray)).collect();
 		Intersections::new(xs)
 	}
+
+	pub fn color_at(&self, ray: Ray) -> Color {
+		let xs = self.intersect(ray);
+		let hit = xs.hit();
+		if let Some(hit) = hit {
+			let c = hit.get_computed();
+			let material = hit.body.material();
+			material.lighting(self.lights[0], c.point, c.eyev, c.normalv)
+		} else {
+			Color::black()
+		}
+	}
 }
 
 impl Default for World {
@@ -37,6 +47,11 @@ impl Default for World {
 #[cfg(test)]
 mod tests{
 	use crate::color::*;
+
+	use crate::sphere::Sphere;
+
+	use crate::matrix::*;
+	use crate::tuple::*;
 	use super::*;
 	#[test]
 	fn empty_wordl()
@@ -95,5 +110,22 @@ mod tests{
     assert_eq!(4.5, xs[1].t);
     assert_eq!(5.5, xs[2].t);
     assert_eq!(6.0, xs[3].t);
+  }
+  #[test]
+  fn the_color_when_a_ray_misses() {
+    let w = create_default_world();
+    let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 1.0, 0.0));
+    let c = w.color_at(r);
+
+    assert_eq!(c, Color::black());
+  }
+
+  #[test]
+  fn the_color_when_a_ray_hits() {
+    let w = create_default_world();
+    let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+    let c = w.color_at(r);
+
+    assert_eq!(c, Color::new(0.38066, 0.47583, 0.2855));
   }
 }

@@ -7,6 +7,7 @@ pub mod body;
 pub mod lights;
 pub mod world;
 pub mod intersections;
+pub mod computed_intersection;
 pub mod material;
 
 pub mod matrix;
