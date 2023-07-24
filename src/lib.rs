@@ -5,6 +5,7 @@ pub mod ray;
 pub mod sphere;
 pub mod body;
 pub mod lights;
+pub mod world;
 pub mod intersections;
 pub mod material;
 

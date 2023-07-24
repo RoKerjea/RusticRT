@@ -57,6 +57,15 @@ impl Index<usize> for Intersections {
 	}
 }
 
+impl IntoIterator for Intersections {
+	type Item = Intersection;
+	type IntoIter = std::vec::IntoIter<Self::Item>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.data.into_iter()
+	}
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
