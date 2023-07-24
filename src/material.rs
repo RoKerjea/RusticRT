@@ -1,7 +1,3 @@
-use crate::matrix::*;
-use crate::ray::*;
-use crate::body::*;
-use crate::intersections::*;
 use crate::tuple::*;
 use crate::F;
 use crate::color::*;
@@ -76,8 +72,8 @@ impl Illuminated for Phong {
                 specular = Color::black();
             }
             else {
-            let factor = reflect_dot_eye.powf(self.shine);
-            specular = light.intensity * self.specular * factor;
+            	let factor = reflect_dot_eye.powf(self.shine);
+            	specular = light.intensity * self.specular * factor;
             }
         }
         ambient + diffuse + specular
@@ -101,17 +97,23 @@ impl Phong {
             }
 
     }
+	pub fn with_color(color: Color) -> Self {
+		Phong {
+		  color,
+		  ..Self::default()
+		}
+	}
 }
 
 #[cfg(test)]
 mod tests{
 	// use crate::fuzzy_eq::FuzzyEq;
-	use super::*;	
+	use super::*;
 	#[test]
 	fn default_material()
 	{
 		let m = Phong::default();
-		
+
 		assert_eq!(m.color, Color::new(1.0, 1.0, 1.0));
 		assert_eq!(m.ambient, 0.1);
 		assert_eq!(m.diffuse, 0.9);
@@ -130,4 +132,69 @@ mod tests{
         let expected = Color::new(1.9, 1.9, 1.9);
         assert_eq!(res, expected);
     }
+	#[test]
+  fn lighting_with_the_eye_between_the_light_and_the_surface_eye_offset_by_45_degrees() {
+    let m = Phong::default();
+    let position = Tuple::point(0.0, 0.0, 0.0);
+
+    let sqrt2_over_2 = (2.0 as F).sqrt() / 2.0;
+    let eyev = Tuple::vector(0.0, sqrt2_over_2, -sqrt2_over_2);
+    let normalv = Tuple::vector(0.0, 0.0, -1.0);
+    let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+
+    let actual_result = m.lighting(light, position, eyev, normalv);
+
+    let expected_result = Color::new(1.0, 1.0, 1.0);
+
+    assert_eq!(actual_result, expected_result);
+  }
+
+  #[test]
+  fn lighting_with_the_eye_opposite_surface_light_offset_by_45_degrees() {
+    let m = Phong::default();
+    let position = Tuple::point(0.0, 0.0, 0.0);
+
+    let eyev = Tuple::vector(0.0, 0.0, -1.0);
+    let normalv = Tuple::vector(0.0, 0.0, -1.0);
+    let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+
+    let actual_result = m.lighting(light, position, eyev, normalv);
+
+    let expected_result = Color::new(0.7364, 0.7364, 0.7364);
+
+    assert_eq!(actual_result, expected_result);
+  }
+
+  #[test]
+  fn lighting_with_the_eye_in_path_of_the_reflection_vector() {
+    let m = Phong::default();
+    let position = Tuple::point(0.0, 0.0, 0.0);
+
+    let sqrt2_over_2 = (2.0 as F).sqrt() / 2.0;
+    let eyev = Tuple::vector(0.0, -sqrt2_over_2, -sqrt2_over_2);
+    let normalv = Tuple::vector(0.0, 0.0, -1.0);
+    let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+
+    let actual_result = m.lighting(light, position, eyev, normalv);
+
+    let expected_result = Color::new(1.6364, 1.6364, 1.6364);
+
+    assert_eq!(actual_result, expected_result);
+  }
+
+  #[test]
+  fn lighting_with_light_behind_the_surface() {
+    let m = Phong::default();
+    let position = Tuple::point(0.0, 0.0, 0.0);
+
+    let eyev = Tuple::vector(0.0, 0.0, -1.0);
+    let normalv = Tuple::vector(0.0, 0.0, -1.0);
+    let light = PointLight::new(Tuple::point(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
+
+    let actual_result = m.lighting(light, position, eyev, normalv);
+
+    let expected_result = Color::new(0.1, 0.1, 0.1);
+
+    assert_eq!(actual_result, expected_result);
+  }
 }
