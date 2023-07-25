@@ -262,7 +262,7 @@ impl Matrix<4>
 		let mut ident = Matrix::identity();
 		ident[0][0] = r.cos();
 		ident[0][2] = r.sin();
-		ident[2][1] = -r.sin();
+		ident[2][0] = -r.sin();
 		ident[2][2] = r.cos();
 		ident
 	}
