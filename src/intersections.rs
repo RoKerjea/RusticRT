@@ -1,9 +1,12 @@
 use crate::body::*;
 use crate::ray::Ray;
 use core::ops::Index;
+// use std::f32::EPSILON;
 use crate::computed_intersection::ComputedIntersection;
 use crate::F;
 
+
+const EPSILON: f64 = 0.00001;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Intersection {
@@ -24,7 +27,8 @@ impl Intersection {
 		if inside{
 			normalv = -normalv;
 		}
-		ComputedIntersection::new(self, position, normalv, eyev, inside)
+    let over_point = position + (normalv * EPSILON);
+		ComputedIntersection::new(self, position, over_point, normalv, eyev, inside)
 	}
 }
 
@@ -82,7 +86,8 @@ impl IntoIterator for Intersections {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::tuple::Tuple;
+  use crate::matrix::Matrix;
+use crate::tuple::Tuple;
   use crate::sphere::Sphere;
 
   #[test]
@@ -155,5 +160,15 @@ mod tests {
 
     assert_eq!(c.inside, true);
     assert_eq!(c.normalv, Tuple::vector(0.0, 0.0, -1.0));
+  }
+  #[test]
+  fn the_hit_should_offset_the_point() {
+    // let material = Material::default();
+    let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+    let s1 = Sphere::new(Some(Matrix::translation(0.0, 0.0, 1.0)));
+    let i = Intersection::new(5.0, r, s1.into());
+    let c = i.get_computed();
+    assert!(c.over_point.z < -EPSILON / 2.0);
+    assert!(c.point.z > c.over_point.z);
   }
 }

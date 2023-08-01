@@ -122,10 +122,10 @@ fn main(){
 	});
 
 	progress.finish();
-    println!("Writing ./output4.png");
+    println!("Writing ./output5.png");
 	let canvas = canvas_mutex.lock().unwrap();
     let png = canvas.to_png();
-    write("./output4.png", png).expect("Could not write ouput4.png to disk.");
+    write("./output5.png", png).expect("Could not write ouput5.png to disk.");
 
     println!("Everything done.");
 }

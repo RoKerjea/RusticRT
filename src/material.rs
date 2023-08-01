@@ -4,7 +4,7 @@ use crate::color::*;
 use crate::lights::PointLight;
 
 pub trait Illuminated {
-    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple) -> Color;
+    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple, in_shadow : bool) -> Color;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -24,9 +24,9 @@ impl Default for Material {
 }
 
 impl Illuminated for Material {
-    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple) -> Color {
+    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple, in_shadow: bool) -> Color {
         match  *self {
-            Material::Phong(ref m) => m.lighting(light, position, eyev, normalv)
+            Material::Phong(ref m) => m.lighting(light, position, eyev, normalv, in_shadow)
         }
     }
 }
@@ -53,12 +53,15 @@ impl Default for Phong {
 }
 
 impl Illuminated for Phong {
-    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple) -> Color {
+    fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple, in_shadow : bool) -> Color {
         let diffuse : Color;
         let specular : Color;
         let effective_color = self.color * light.intensity;
         let lightv = (light.position - position).normalize();
         let ambient = effective_color * self.ambient;
+        if in_shadow {
+            return ambient;
+        }
         let light_dot_normal = lightv.dot(normalv);
         if light_dot_normal < 0.0 {
             diffuse = Color::black();
@@ -128,7 +131,7 @@ mod tests{
         let eyev = Tuple::vector(0.0, 0.0, -1.0);
         let normalv = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let res = m.lighting(light, position, eyev, normalv);
+        let res = m.lighting(light, position, eyev, normalv, false);
         let expected = Color::new(1.9, 1.9, 1.9);
         assert_eq!(res, expected);
     }
@@ -142,7 +145,7 @@ mod tests{
     let normalv = Tuple::vector(0.0, 0.0, -1.0);
     let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-    let actual_result = m.lighting(light, position, eyev, normalv);
+    let actual_result = m.lighting(light, position, eyev, normalv, false);
 
     let expected_result = Color::new(1.0, 1.0, 1.0);
 
@@ -158,7 +161,7 @@ mod tests{
     let normalv = Tuple::vector(0.0, 0.0, -1.0);
     let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-    let actual_result = m.lighting(light, position, eyev, normalv);
+    let actual_result = m.lighting(light, position, eyev, normalv, false);
 
     let expected_result = Color::new(0.7364, 0.7364, 0.7364);
 
@@ -175,7 +178,7 @@ mod tests{
     let normalv = Tuple::vector(0.0, 0.0, -1.0);
     let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
 
-    let actual_result = m.lighting(light, position, eyev, normalv);
+    let actual_result = m.lighting(light, position, eyev, normalv, false);
 
     let expected_result = Color::new(1.6364, 1.6364, 1.6364);
 
@@ -191,7 +194,22 @@ mod tests{
     let normalv = Tuple::vector(0.0, 0.0, -1.0);
     let light = PointLight::new(Tuple::point(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
 
-    let actual_result = m.lighting(light, position, eyev, normalv);
+    let actual_result = m.lighting(light, position, eyev, normalv, false);
+
+    let expected_result = Color::new(0.1, 0.1, 0.1);
+
+    assert_eq!(actual_result, expected_result);
+  }
+  #[test]
+  fn lighting_with_surface_in_shadow() {
+    let m = Phong::default();
+    let position = Tuple::point(0.0, 0.0, 0.0);
+
+    let eyev = Tuple::vector(0.0, 0.0, -1.0);
+    let normalv = Tuple::vector(0.0, 0.0, -1.0);
+    let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+
+    let actual_result = m.lighting(light, position, eyev, normalv, true);
 
     let expected_result = Color::new(0.1, 0.1, 0.1);
 
