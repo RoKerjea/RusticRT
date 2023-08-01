@@ -24,7 +24,7 @@ fn main(){
 
 	let canvas_pixel_world_size = wall_size / WIDTH as f64;
 	let color = Color::new(1.0, 0.0, 0.0);
-	let sphere = Sphere::new(None);
+	let sphere = Sphere::default();
 
 	let canvas_mutex = Mutex::new(Canvas::new(WIDTH, HEIGHT));
 	println!(

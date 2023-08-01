@@ -92,7 +92,8 @@ use crate::tuple::Tuple;
 
   #[test]
   fn the_hit_when_all_intersections_have_positive_t() {
-    let s = Sphere::new(None);
+    
+    let s = Sphere::default();
 
     let r = Ray::new(Tuple::point(1.0, 1.0, 1.0), Tuple::vector(0.0, 0.0, 1.0));
     let i1 = Intersection::new(1.0, r, Body::from(s));
@@ -105,7 +106,8 @@ use crate::tuple::Tuple;
 
   #[test]
   fn the_hit_when_some_intersections_have_negative_t() {
-    let s = Sphere::new(None);
+    
+    let s = Sphere::default();
 
     let r = Ray::new(Tuple::point(1.0, 1.0, 1.0), Tuple::vector(0.0, 0.0, 1.0));
     let i1 = Intersection::new(-1.0, r, Body::from(s));
@@ -118,7 +120,8 @@ use crate::tuple::Tuple;
 
   #[test]
   fn the_hit_when_all_intersections_have_negative_t() {
-    let s = Sphere::new(None);
+    
+    let s = Sphere::default();
 
     let r = Ray::new(Tuple::point(1.0, 1.0, 1.0), Tuple::vector(0.0, 0.0, 1.0));
     let i1 = Intersection::new(-2.0, r, Body::from(s));
@@ -131,7 +134,7 @@ use crate::tuple::Tuple;
   #[test]
   fn precomputing_the_state_of_an_intersection() {
     let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-    let body = Body::from(Sphere::new(None));
+    let body = Body::from(Sphere::default());
     let i = Intersection::new(4.0, r, body);
     let c = i.get_computed();
 
@@ -144,7 +147,7 @@ use crate::tuple::Tuple;
   #[test]
   fn the_hit_when_an_intersection_occurs_on_the_outside() {
     let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-    let body = Body::from(Sphere::new(None));
+    let body = Body::from(Sphere::default());
     let i = Intersection::new(4.0, r, body);
     let c = i.get_computed();
 
@@ -154,7 +157,7 @@ use crate::tuple::Tuple;
   #[test]
   fn the_hit_when_an_intersection_occurs_on_the_inside() {
     let r = Ray::new(Tuple::point(0.0, 0.0, 0.0), Tuple::vector(0.0, 0.0, 1.0));
-    let body = Body::from(Sphere::new(None));
+    let body = Body::from(Sphere::default());
     let i = Intersection::new(1.0, r, body);
     let c = i.get_computed();
 
@@ -165,7 +168,8 @@ use crate::tuple::Tuple;
   fn the_hit_should_offset_the_point() {
     // let material = Material::default();
     let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-    let s1 = Sphere::new(Some(Matrix::translation(0.0, 0.0, 1.0)));
+
+    let s1 = Sphere::default().with_transform(Matrix::translation(0.0, 0.0, 1.0));
     let i = Intersection::new(5.0, r, s1.into());
     let c = i.get_computed();
     assert!(c.over_point.z < -EPSILON / 2.0);

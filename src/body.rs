@@ -50,7 +50,7 @@ mod tests{
 	#[test]
 	fn	intersection_encapsulate_t_and_body()
 	{
-		let s = Sphere::new(None);
+		let s = Sphere::default();
 
 		let r = Ray::new(Tuple::point(1.0, 1.0, 1.0), Tuple::vector(0.0, 0.0, 1.0));
 		let i = Intersection::new(3.5, r, Body::from(s));
