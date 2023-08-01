@@ -5,7 +5,6 @@ use rustic_rt::canvas::Canvas;
 use std::fs::{read_to_string, write};
 use std::sync::Mutex;
 use rustic_rt::canvas::to_png::*;
-use rustic_rt::canvas::*;
 use rustic_rt::world_loader::yaml;
 use rustic_rt::world_loader::WorldLoader;
 

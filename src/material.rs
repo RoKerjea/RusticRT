@@ -1,4 +1,8 @@
 use crate::fuzzy_eq::FuzzyEq;
+use crate::pattern;
+use crate::pattern::Pattern;
+use crate::pattern::Stencil;
+use crate::pattern::Striped;
 use crate::tuple::*;
 use crate::F;
 use crate::color::*;
@@ -35,6 +39,7 @@ impl Illuminated for Material {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Phong {
     pub color: Color,
+    pub pattern: Option<Pattern>,
     pub ambient: F,
     pub diffuse: F,
     pub specular: F,
@@ -45,6 +50,7 @@ impl Default for Phong {
     fn default() -> Self {
         Phong {
             color: Color::new(1.0, 1.0, 1.0),
+            pattern: Some(Pattern::from(Striped::default())),
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
@@ -57,7 +63,11 @@ impl Illuminated for Phong {
     fn lighting(&self, light: PointLight, position: Tuple, eyev: Tuple, normalv: Tuple, in_shadow : bool) -> Color {
         let diffuse : Color;
         let specular : Color;
-        let effective_color = self.color * light.intensity;
+        let mut color = self.color;
+        if let Some(pattern) = self.pattern {
+            color = pattern.color_at(position);
+        }
+        let effective_color = color * light.intensity;
         let lightv = (light.position - position).normalize();
         let ambient = effective_color * self.ambient;
         if in_shadow {
@@ -94,6 +104,7 @@ impl Phong {
         -> Self {
             Phong {
                 color,
+                pattern: None,
                 ambient,
                 diffuse,
                 specular,
@@ -134,6 +145,7 @@ impl FuzzyEq<Phong> for Phong {
         && self.diffuse.fuzzy_eq(other.diffuse)
         && self.specular.fuzzy_eq(other.specular)
         && self.shine.fuzzy_eq(other.shine)
+        && self.pattern.fuzzy_eq(other.pattern)
     }
   }
 

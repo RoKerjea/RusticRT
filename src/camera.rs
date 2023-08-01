@@ -92,7 +92,6 @@ impl FuzzyEq<Camera> for Camera {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::fuzzy_eq::*;
 	use std::f64::consts::PI;
 	#[test]
   fn constructing_a_camera() {

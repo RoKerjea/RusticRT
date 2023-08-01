@@ -12,6 +12,7 @@ pub mod world;
 pub mod intersections;
 pub mod computed_intersection;
 pub mod material;
+pub mod pattern;
 pub mod world_loader;
 
 #[macro_use]

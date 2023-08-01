@@ -3,11 +3,7 @@ pub mod to_ppm;
 pub mod to_png;
 
 use std::vec::Vec;
-use num_traits::Float;
-// use num_traits::Num;
 use crate::color::Color;
-
-// use super::util::*;
 
 // pub trait	Sized {
 // 	fn	width(&self) -> usize;
@@ -15,14 +11,11 @@ use crate::color::Color;
 // }
 
 #[derive(Debug, Clone)]
-pub struct	Canvas<T = f64>
-where
-	T: Float,
-{
+pub struct	Canvas{
 	pub width : usize,
 	pub height : usize,
 
-	pixels: Vec<Color<T>>,
+	pixels: Vec<Color>,
 }
 
 pub trait  Sized
@@ -31,7 +24,7 @@ pub trait  Sized
 	fn height(&self) -> usize;
 }
 
-impl<T: Float> Sized for Canvas<T> {
+impl Sized for Canvas {
 	fn width(&self) -> usize {
 		self.width
 	}
@@ -40,7 +33,7 @@ impl<T: Float> Sized for Canvas<T> {
 	}
 }
 
-impl<T: Float> Canvas<T>{
+impl Canvas{
 	pub fn new(width: usize, height: usize) -> Self{
 		Self {
 			width,
@@ -48,13 +41,13 @@ impl<T: Float> Canvas<T>{
 			pixels: vec![Color::black(); width * height],
 		}
 	}
-	pub	fn color_at(&self, x: usize, y:usize) -> Color<T> {
+	pub	fn color_at(&self, x: usize, y:usize) -> Color {
 		self.pixels[self.get_pixel_index(x, y)]
 	}
 	pub fn	get_pixel_index(&self, x: usize, y: usize) ->usize {
 		y * self.width + x
 	}
-	pub fn	write_pixel(&mut self, x: usize, y: usize, color:Color<T>){
+	pub fn	write_pixel(&mut self, x: usize, y: usize, color:Color){
 		let index = self.get_pixel_index(x, y);
 		self.pixels[index] = color;
 	}
