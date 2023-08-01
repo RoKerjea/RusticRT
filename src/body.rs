@@ -1,5 +1,6 @@
 use crate::F;
 use crate::matrix::Matrix;
+use crate::plane::Plane;
 // use crate::intersections::*;
 use crate::ray::*;
 use crate::material::Material;
@@ -8,8 +9,8 @@ use crate::intersections::*;
 use crate::tuple::*;
 
 pub trait Intersectable {
-	fn normal_at(&self, point: Tuple) -> Tuple;
 	fn material(&self) -> Material;
+	fn normal_at_in_object_space(&self, point: Tuple) -> Tuple;
 	fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(F, Body)>;
 	fn transform(&self) -> Matrix<4>;
 	fn intersect(&self, ray: Ray) -> Intersections
@@ -20,11 +21,20 @@ pub trait Intersectable {
 			Intersection::new(t, ray, body)
 		}).collect())
 	}
+
+	fn normal_at(&self, point: Tuple) -> Tuple{
+        let object_point = self.transform().inverse() * point;
+        let object_normal = self.normal_at_in_object_space(object_point); 
+        let mut world_normal = self.transform().inverse().transpose() * object_normal;
+        world_normal.w = 0.0;
+        world_normal.normalize() 
+	}
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Body{
 	Sphere(Sphere),
+	Plane(Plane),
 }
 
 impl From<Sphere> for Body {
@@ -33,25 +43,35 @@ impl From<Sphere> for Body {
 	}
 }
 
+impl From<Plane> for Body {
+	fn from(plane: Plane) -> Self {
+		Body::Plane(plane)
+	}
+}
+
 impl Intersectable for Body{
 	fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(F, Body)> {
 		match  *self {
 			Body::Sphere(ref sphere) => sphere.intersect_in_object_space(object_space_ray),
+			Body::Plane(ref plane) => plane.intersect_in_object_space(object_space_ray),
 		}
 	}
-	fn normal_at(&self, point: Tuple) -> Tuple {
+	fn normal_at_in_object_space(&self, object_space_point: Tuple) -> Tuple {
 		match *self {
-			Body::Sphere(ref sphere) => sphere.normal_at(point),
+			Body::Sphere(ref sphere) => sphere.normal_at_in_object_space(object_space_point),
+			Body::Plane(ref plane) => plane.normal_at_in_object_space(object_space_point),
 		}
 	}
 	fn material(&self) -> Material {
 		match  *self {
 			Body::Sphere(ref sphere) => sphere.material(),
+			Body::Plane(ref plane) => plane.material(),
 		}
 	}
 	fn transform(&self) -> Matrix<4> {
 		match  *self {
 			Body::Sphere(ref sphere) => sphere.transform(),
+			Body::Plane(ref plane) => plane.transform(),
 		}
 	}
 }

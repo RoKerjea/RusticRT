@@ -5,6 +5,7 @@ use raytracer::camera::Camera;
 use raytracer::color::Color;
 use raytracer::lights::PointLight;
 use raytracer::matrix::Matrix;
+use raytracer::plane::Plane;
 use raytracer::sphere::*;
 use raytracer::canvas::to_png::*;
 use raytracer::canvas::*;
@@ -31,26 +32,11 @@ fn main(){
         ..Phong::default()
     });
 
-    let floor_sphere = Sphere::new(
+    let floor = Plane::new(
         floor_material,
-        Matrix::scaling(10.0, 0.01, 10.0),
+        Matrix::identity(),
     );
   
-    let left_wall_sphere = Sphere::new(
-      Material::from(floor_material),
-      Matrix::translation(0.0, 0.0, 5.0)
-        * Matrix::rotation_y(-PI / 4.0)
-        * Matrix::rotation_x(PI / 2.0)
-        * Matrix::scaling(10.0, 0.01, 10.0),
-    );
-    
-    let right_wall_sphere = Sphere::new(
-      Material::from(floor_material),
-      Matrix::translation(0.0, 0.0, 5.0)
-        * Matrix::rotation_y(PI / 4.0)
-        * Matrix::rotation_x(PI / 2.0)
-        * Matrix::scaling(10.0, 0.01, 10.0),
-    );
 
 	// Spheres
     let left_material = Material::from(Phong {
@@ -83,9 +69,7 @@ fn main(){
     
       let world = World::new(
         vec![
-          Body::from(floor_sphere),
-          Body::from(left_wall_sphere),
-          Body::from(right_wall_sphere),
+          Body::from(floor),
           Body::from(left_sphere),
           Body::from(middle_sphere),
           Body::from(right_sphere),
@@ -93,7 +77,7 @@ fn main(){
         vec![light],
       );
       let camera = Camera::new(WIDTH, HEIGHT, PI / 3.0).view_transform(
-        Tuple::point(0.0, 3.5, -5.0),
+        Tuple::point(0.0, 1.5, -5.0),
         Tuple::point(0.0, 1.0, 0.0),
         Tuple::vector(0.0, 1.0, 0.0),
       );
@@ -116,10 +100,10 @@ fn main(){
 	});
 
 	progress.finish();
-    println!("Writing ./output5.png");
+    println!("Writing ./output6.png");
 	let canvas = canvas_mutex.lock().unwrap();
     let png = canvas.to_png();
-    write("./output5.png", png).expect("Could not write ouput5.png to disk.");
+    write("./output6.png", png).expect("Could not write ouput6.png to disk.");
 
     println!("Everything done.");
 }

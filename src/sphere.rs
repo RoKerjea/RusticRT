@@ -1,5 +1,4 @@
 use crate::body::*;
-use crate::intersections::*;
 use crate::material::*;
 use crate::matrix::*;
 use crate::ray::*;
@@ -59,12 +58,8 @@ impl Intersectable for Sphere {
             ]
         }
     }
-    fn normal_at(&self, point: Tuple) -> Tuple {
-        let object_point = self.transform.inverse() * point;
-        let object_normal = (object_point - Tuple::new(0.0, 0.0, 0.0, 1.0)).normalize();
-        let mut world_normal = self.transform.inverse().transpose() * object_normal;
-        world_normal.w = 0.0;
-        world_normal.normalize()
+    fn normal_at_in_object_space(&self, object_space_point: Tuple) -> Tuple {
+        (object_space_point - Tuple::new(0.0, 0.0, 0.0, 1.0)).normalize()
     }
     fn material(&self) -> Material {
         self.material

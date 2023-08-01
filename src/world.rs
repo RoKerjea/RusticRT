@@ -1,11 +1,9 @@
-use itertools::Position;
 
 use crate::body::*;
 use crate::color::Color;
 use crate::intersections::*;
 use crate::lights::PointLight;
 use crate::material::*;
-use crate::ray;
 use crate::ray::*;
 use crate::tuple::Tuple;
 

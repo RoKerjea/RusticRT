@@ -10,7 +10,6 @@ pub struct Camera {
 	pub field_of_view: F,
 	half_width: F,
 	half_height: F,
-	aspect_ratio: F,
 	pixel_size: F,
 }
 
@@ -38,7 +37,6 @@ impl Camera{
 			transform: Matrix::identity(),
 			half_height,
 			half_width,
-			aspect_ratio,
 			pixel_size,
 		}
 	}

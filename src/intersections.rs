@@ -1,12 +1,10 @@
 use crate::body::*;
 use crate::ray::Ray;
 use core::ops::Index;
-// use std::f32::EPSILON;
+
+use crate::EPSILON;
 use crate::computed_intersection::ComputedIntersection;
 use crate::F;
-
-
-const EPSILON: f64 = 0.00001;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Intersection {
