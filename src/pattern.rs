@@ -41,7 +41,7 @@ pub struct Striped {
 }
 
 impl Striped {
-    pub fn with_color(mut self, color_a: Color, color_b: Color) -> Self {
+    pub fn with_colors(mut self, color_a: Color, color_b: Color) -> Self {
         self.color_a = color_a;
         self.color_b = color_b;
         self

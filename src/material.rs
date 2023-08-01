@@ -136,6 +136,10 @@ impl Phong {
       self.shine = shininess;
       self
     }
+    pub fn with_pattern(mut self, pattern: Pattern) -> Self {
+      self.pattern = Some(pattern);
+      self
+    }
 }
 
 impl FuzzyEq<Phong> for Phong {
