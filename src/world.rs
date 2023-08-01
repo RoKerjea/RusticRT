@@ -1,12 +1,14 @@
 
 use crate::body::*;
 use crate::color::Color;
+use crate::fuzzy_eq::FuzzyEq;
 use crate::intersections::*;
 use crate::lights::PointLight;
 use crate::material::*;
 use crate::ray::*;
 use crate::tuple::Tuple;
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct World {
     pub bodies: Vec<Body>,
     pub lights: Vec<PointLight>,
@@ -62,6 +64,12 @@ impl Default for World {
         }
     }
 }
+
+impl FuzzyEq<World> for World {
+	fn fuzzy_eq(&self, other: World) -> bool {
+	  self.bodies.fuzzy_eq(other.bodies) && self.lights.fuzzy_eq(other.lights)
+	}
+  }
 
 #[cfg(test)]
 mod tests {

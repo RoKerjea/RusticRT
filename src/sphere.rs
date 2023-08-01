@@ -1,4 +1,5 @@
 use crate::body::*;
+use crate::fuzzy_eq::FuzzyEq;
 use crate::material::*;
 use crate::matrix::*;
 use crate::ray::*;
@@ -36,6 +37,12 @@ impl Sphere {
         self
     }
 }
+
+impl FuzzyEq<&Sphere> for Sphere {
+	fn fuzzy_eq(&self, other: &Sphere) -> bool {
+	  self.transform.fuzzy_eq(other.transform) && self.material.fuzzy_eq(other.material)
+	}
+  }
 
 impl Intersectable for Sphere {
     fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(crate::F, Body)> {

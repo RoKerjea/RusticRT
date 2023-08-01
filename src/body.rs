@@ -1,4 +1,5 @@
 use crate::F;
+use crate::fuzzy_eq::FuzzyEq;
 use crate::matrix::Matrix;
 use crate::plane::Plane;
 // use crate::intersections::*;
@@ -75,7 +76,15 @@ impl Intersectable for Body{
 		}
 	}
 }
-
+impl FuzzyEq<Body> for Body {
+	fn fuzzy_eq(&self, other: Body) -> bool {
+	  match (*self, other) {
+		(Body::Sphere(ref sphere), Body::Sphere(ref other)) => sphere.fuzzy_eq(other),
+		(Body::Plane(ref plane), Body::Plane(ref other)) => plane.fuzzy_eq(other),
+		_ => false,
+	  }
+	}
+  }
 
 
 #[cfg(test)]

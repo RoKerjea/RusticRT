@@ -1,5 +1,6 @@
 pub mod tuple;
 pub mod color;
+pub mod matrix;
 pub mod canvas;
 pub mod ray;
 pub mod sphere;
@@ -11,8 +12,7 @@ pub mod world;
 pub mod intersections;
 pub mod computed_intersection;
 pub mod material;
-
-pub mod matrix;
+pub mod world_loader;
 
 #[macro_use]
 mod fuzzy_eq;

@@ -1,3 +1,4 @@
+use crate::fuzzy_eq::FuzzyEq;
 use crate::tuple::*;
 use crate::F;
 use crate::color::*;
@@ -100,13 +101,52 @@ impl Phong {
             }
 
     }
-	pub fn with_color(color: Color) -> Self {
-		Phong {
-		  color,
-		  ..Self::default()
-		}
+	pub fn with_color(mut self, color: Color) -> Self {
+		self.color = color;
+        self
 	}
+
+    pub fn with_ambient(mut self, ambient: F) -> Self {
+      self.ambient = ambient;
+      self
+    }
+  
+    pub fn with_diffuse(mut self, diffuse: F) -> Self {
+      self.diffuse = diffuse;
+      self
+    }
+  
+    pub fn with_specular(mut self, specular: F) -> Self {
+      self.specular = specular;
+      self
+    }
+  
+    pub fn with_shininess(mut self, shininess: F) -> Self {
+      self.shine = shininess;
+      self
+    }
 }
+
+impl FuzzyEq<Phong> for Phong {
+    fn fuzzy_eq(&self, other: Phong) -> bool {
+      self.color.fuzzy_eq(other.color)
+        && self.ambient.fuzzy_eq(other.ambient)
+        && self.diffuse.fuzzy_eq(other.diffuse)
+        && self.specular.fuzzy_eq(other.specular)
+        && self.shine.fuzzy_eq(other.shine)
+    }
+  }
+
+impl FuzzyEq<Material> for Material {
+    fn fuzzy_eq(&self, other: Material) -> bool {
+      match (self, other) {
+        (Material::Phong(ref m), Material::Phong(other)) => m.fuzzy_eq(other),
+        // Add default case (different types) to return false, once more than one
+        // Material exists
+        // _ => false,
+      }
+    }
+  }
 
 #[cfg(test)]
 mod tests{

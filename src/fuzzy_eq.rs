@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 
 const EPSILON: f64 = 0.00001;
 
@@ -16,18 +17,95 @@ impl FuzzyEq<f64> for f64 {
     }
 }
 
-// pub fn fuzzy_eq(left : f64, right: f64) -> bool {
-// 	let epsilon = 0.00001;
-// 	(left- right).abs() < epsilon
-// }
+impl<T> FuzzyEq<Vec<T>> for Vec<T>
+where
+  T: FuzzyEq<T>,
+  T: Clone,
+{
+  fn fuzzy_eq(&self, other: Vec<T>) -> bool {
+    if self.len() != other.len() {
+      return false;
+    }
 
-//Macro "adapted" from 'assert_eq!
-//i don't understand what's happening here for now
-//and honestly, i really don't need it for now
+    for (index, item) in self.iter().enumerate() {
+      if item.fuzzy_ne(other[index].clone()) {
+        return false;
+      }
+    }
 
-// #[macro_export]
-// macro_rules! assert_fuzzy_eq {
-// 	($left:expr, $right:expr $(,)?) => {
-		
-// 	};
-// }
+    true
+  }
+}
+
+impl<T, U> FuzzyEq<HashMap<T, U>> for HashMap<T, U>
+where
+  T: FuzzyEq<T> + std::cmp::Eq + std::hash::Hash,
+  U: FuzzyEq<U>,
+  T: Clone,
+  U: Clone,
+{
+  fn fuzzy_eq(&self, other: HashMap<T, U>) -> bool {
+    if self.len() != other.len() {
+      return false;
+    }
+
+    for (key, value) in self.iter() {
+      if !other.contains_key(key) {
+        return false;
+      }
+
+      if value.fuzzy_ne(other.get(key).unwrap().clone()) {
+        return false;
+      }
+    }
+
+    true
+  }
+}
+
+impl FuzzyEq<&String> for String {
+  fn fuzzy_eq(&self, other: &String) -> bool {
+    self.eq(other)
+  }
+}
+
+impl FuzzyEq<String> for String {
+  fn fuzzy_eq(&self, other: String) -> bool {
+    self.eq(&other)
+  }
+}
+
+// Not really sure what I am doing here, as I don't have a great understanding of macros yet.
+// Feel free to fix or enhance in the future.
+// @TODO: Check if we can ensure more explicitly the two operands implement the `FuzzyEq` trait
+#[macro_export]
+macro_rules! assert_fuzzy_eq {
+  ($left:expr, $right:expr $(,)?) => {{
+    match (&$left, $right) {
+      (left_val, right_val) => {
+        if left_val.fuzzy_ne(right_val.clone()) {
+          panic!(
+            "asserting fuzzy equality. {:?} is not fuzzy equal to {:?}",
+            left_val, right_val
+          );
+        }
+      }
+    }
+  }};
+}
+
+#[macro_export]
+macro_rules! assert_fuzzy_ne {
+  ($left:expr, $right:expr $(,)?) => {{
+    match (&$left, $right) {
+      (left_val, right_val) => {
+        if left_val.fuzzy_eq(right_val) {
+          panic!(
+            "asserting fuzzy in-equality. {:?} is fuzzy equal to {:?}",
+            left_val, right_val
+          );
+        }
+      }
+    }
+  }};
+}

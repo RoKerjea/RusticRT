@@ -1,4 +1,5 @@
 use crate::body::*;
+use crate::fuzzy_eq::FuzzyEq;
 use crate::material::*;
 use crate::matrix::*;
 use crate::ray::*;
@@ -59,6 +60,12 @@ impl Intersectable for Plane {
         self.transform
     }
 }
+
+impl FuzzyEq<&Plane> for Plane {
+    fn fuzzy_eq(&self, other: &Plane) -> bool {
+      self.transform.fuzzy_eq(other.transform) && self.material.fuzzy_eq(other.material)
+    }
+  }
 
 #[cfg(test)]
 mod tests {

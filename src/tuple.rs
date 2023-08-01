@@ -47,6 +47,15 @@ impl PartialEq<Tuple> for Tuple {
   }
 }
 
+impl FuzzyEq<Tuple> for Tuple {
+	fn fuzzy_eq(&self, other: Self) -> bool {
+	  self.x.fuzzy_eq(other.x)
+		&& self.y.fuzzy_eq(other.y)
+		&& self.z.fuzzy_eq(other.z)
+		&& self.w.fuzzy_eq(other.w)
+	}
+  }
+
 impl Add<Self> for Tuple {
   type Output = Self;
 
