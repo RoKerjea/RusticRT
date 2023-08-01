@@ -39,8 +39,8 @@ impl Sphere {
 }
 
 impl Intersectable for Sphere {
-    fn intersect(&self, ray: Ray) -> Intersections {
-        let object_space_ray = ray.transform(self.transform.inverse());
+    fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(crate::F, Body)> {
+        // let object_space_ray = ray.transform(self.transform.inverse());
 
         let sphere_to_ray = object_space_ray.origin - Tuple::point(0.0, 0.0, 0.0);
         let a = object_space_ray.direction.dot(object_space_ray.direction);
@@ -49,14 +49,14 @@ impl Intersectable for Sphere {
         let discriminant = b.powi(2) - 4.0 * a * c;
 
         if discriminant < 0.0 {
-            Intersections::new(vec![])
+            vec![]
         } else {
             let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
-            Intersections::from(vec![
-                Intersection::new(t1, ray, Body::from(*self)),
-                Intersection::new(t2, ray, Body::from(*self)),
-            ])
+            vec![
+                (t1, Body::from(*self)),
+                (t2, Body::from(*self)),
+            ]
         }
     }
     fn normal_at(&self, point: Tuple) -> Tuple {
@@ -68,6 +68,9 @@ impl Intersectable for Sphere {
     }
     fn material(&self) -> Material {
         self.material
+    }
+    fn transform(&self) -> Matrix<4> {
+        self.transform
     }
 }
 

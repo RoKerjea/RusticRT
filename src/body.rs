@@ -1,3 +1,5 @@
+use crate::F;
+use crate::matrix::Matrix;
 // use crate::intersections::*;
 use crate::ray::*;
 use crate::material::Material;
@@ -6,9 +8,18 @@ use crate::intersections::*;
 use crate::tuple::*;
 
 pub trait Intersectable {
-	fn intersect(&self, ray: Ray) -> Intersections;
 	fn normal_at(&self, point: Tuple) -> Tuple;
 	fn material(&self) -> Material;
+	fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(F, Body)>;
+	fn transform(&self) -> Matrix<4>;
+	fn intersect(&self, ray: Ray) -> Intersections
+	{
+        let object_space_ray = ray.transform(self.transform().inverse());
+		let ts = self.intersect_in_object_space(object_space_ray);
+		Intersections::new(ts.into_iter().map(|(t, body)| {
+			Intersection::new(t, ray, body)
+		}).collect())
+	}
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -23,9 +34,9 @@ impl From<Sphere> for Body {
 }
 
 impl Intersectable for Body{
-	fn intersect(&self, ray: Ray) -> Intersections {
+	fn intersect_in_object_space(&self, object_space_ray: Ray) -> Vec<(F, Body)> {
 		match  *self {
-			Body::Sphere(ref sphere) => sphere.intersect(ray),
+			Body::Sphere(ref sphere) => sphere.intersect_in_object_space(object_space_ray),
 		}
 	}
 	fn normal_at(&self, point: Tuple) -> Tuple {
@@ -36,6 +47,11 @@ impl Intersectable for Body{
 	fn material(&self) -> Material {
 		match  *self {
 			Body::Sphere(ref sphere) => sphere.material(),
+		}
+	}
+	fn transform(&self) -> Matrix<4> {
+		match  *self {
+			Body::Sphere(ref sphere) => sphere.transform(),
 		}
 	}
 }
