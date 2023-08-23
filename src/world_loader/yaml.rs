@@ -16,7 +16,7 @@ use crate::plane::Plane;
 use crate::sphere::Sphere;
 use crate::tuple::Tuple;
 use crate::world::World;
-use crate::{pattern, F};
+use crate::F;
 
 #[derive(Clone)]
 enum Segment {

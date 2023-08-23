@@ -1,5 +1,4 @@
 use crate::fuzzy_eq::FuzzyEq;
-use crate::pattern;
 use crate::pattern::Pattern;
 use crate::pattern::Stencil;
 use crate::pattern::Striped;

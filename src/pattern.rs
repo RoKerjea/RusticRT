@@ -1,9 +1,9 @@
-use crate::{color::Color, fuzzy_eq::FuzzyEq, tuple::Tuple};
+use crate::{color::Color, fuzzy_eq::FuzzyEq, tuple::Tuple, body::Body};
 
 
 
 pub trait Stencil {
-    fn color_at(&self, position: Tuple) -> Color;
+    fn color_at(&self, position: Tuple, body: &Body) -> Color;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -21,9 +21,9 @@ impl FuzzyEq<Pattern> for Pattern {
 }
 
 impl Stencil for Pattern {
-    fn color_at(&self, position: Tuple) -> Color {
+    fn color_at(&self, position: Tuple, body: &Body) -> Color {
         match *self {
-            Pattern::Striped(ref striped) => striped.color_at(position),
+            Pattern::Striped(ref striped) => striped.color_at(position, body),
         }
     }
 }
@@ -58,7 +58,7 @@ impl Default for Striped {
 }
 
 impl Stencil for Striped {
-    fn color_at(&self, position: Tuple) -> Color {
+    fn color_at(&self, position: Tuple, body: &Body) -> Color {
         let x = position.x;
         if x.floor() as isize %2 == 0 {
             self.color_a
@@ -128,6 +128,10 @@ use super::*;
     assert_fuzzy_eq!(
       Color::white(),
       pattern.color_at(Tuple::point(1.0, 0.0, 0.0))
+    );
+    assert_fuzzy_eq!(
+      Color::black(),
+      pattern.color_at(Tuple::point(0.1, 0.0, 0.0))
     );
     assert_fuzzy_eq!(
       Color::white(),
