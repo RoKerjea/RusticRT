@@ -47,7 +47,7 @@ fn main(){
         left_material,
         Matrix::translation(-1.5, 0.33, -0.75) * Matrix::scaling(0.33, 0.33, 0.33),
       );
-    
+
       let middle_material = Material::from(Phong {
         color: Color::new(1.0, 0.49, 0.0),
         diffuse: 0.7,
@@ -57,7 +57,7 @@ fn main(){
       });
       let middle_sphere =
         Sphere::new(middle_material, Matrix::translation(-0.5, 1.0, 0.5));
-    
+
       let right_material = Material::from(Phong {
         color: Color::new(0.51, 0.75, 0.06),
         ..Phong::default()
@@ -66,7 +66,7 @@ fn main(){
         right_material,
         Matrix::translation(1.5, 0.5, -0.5) * Matrix::scaling(0.5, 0.5, 0.5),
       );
-    
+
       let world = World::new(
         vec![
           Body::from(floor),
@@ -81,7 +81,7 @@ fn main(){
         Tuple::point(0.0, 1.0, 0.0),
         Tuple::vector(0.0, 1.0, 0.0),
       );
-	
+
 	let canvas_mutex = Mutex::new(Canvas::new(WIDTH, HEIGHT));
 	println!(
 		"Raytracing {} pixels. Please be patient...", WIDTH * HEIGHT);
