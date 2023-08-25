@@ -1,17 +1,18 @@
 use crate::body::{Body, Intersectable};
 use crate::color::Color;
 use crate::fuzzy_eq::FuzzyEq;
-// use crate::matrix::Matrix;
+use crate::matrix::Matrix;
 use crate::tuple::Tuple;
 
 
 pub trait Stencil {
     fn color_at_in_pattern_space(&self, position: Tuple) -> Color;
-    // fn transform(&self) -> Matrix<4>;
+    fn transform(&self) -> Matrix<4>; 
     fn color_at(&self, position: Tuple, body: &Body) -> Color{
       let object_position = body.transform().inverse() * position;
-      // let pattern_position = self.transform().inverse() * object_position;
-      self.color_at_in_pattern_space(object_position)
+      //apply pattern transform to color at position
+      let pattern_position = self.transform().inverse() * object_position;
+      self.color_at_in_pattern_space(pattern_position)
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -33,12 +34,12 @@ impl Stencil for Pattern {
             Pattern::Striped(ref striped) => striped.color_at_in_pattern_space(position),
         }
     }
-    // fn transform(&self) -> Matrix<4> {
-    //   match *self {
-    //     Pattern::Striped(ref striped) => striped.transform(),
-    //     // Pattern::Gradient(ref gradient) => gradient.transform(),
-    //   }
-    // }
+    fn transform(&self) -> Matrix<4> {
+      match *self {
+        Pattern::Striped(ref striped) => striped.transform(),
+        // Pattern::Gradient(ref gradient) => gradient.transform(),
+      }
+    }
 }
 
 impl From<Striped> for Pattern {
@@ -51,12 +52,18 @@ impl From<Striped> for Pattern {
 pub struct Striped {
     color_a: Color,
     color_b: Color,
+    transform: Matrix<4>,
 }
 
 impl Striped {
     pub fn with_colors(mut self, color_a: Color, color_b: Color) -> Self {
         self.color_a = color_a;
         self.color_b = color_b;
+        self
+    }
+
+    pub fn with_transform(mut self, transform: Matrix<4>) -> Self {
+        self.transform = transform;
         self
     }
 }
@@ -66,6 +73,7 @@ impl Default for Striped {
         Self {
             color_a: Color::black(),
             color_b: Color::white(),
+            transform: Matrix::identity(),
         }
     }
 }
@@ -78,6 +86,9 @@ impl Stencil for Striped {
         } else {
             self.color_b
         }
+    }
+    fn transform(&self) -> Matrix<4> {
+      self.transform
     }
 }
 

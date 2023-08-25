@@ -383,19 +383,19 @@ impl<'a> YamlParser<'a> {
       self.path.push(Segment::Key("colorB".into()));
       let color_b = self.visit_color(color_b_value)?;
       self.path.pop();
-  
-      // let mut transform = Matrix::identity();
-      // if pattern_hash.contains_key(key!("transforms")) {
-        // let transforms_value = self.get_value_from_hash(pattern_hash, "transforms")?;
-        // self.path.push(Segment::Key("transform".into()));
-        // transform = self.visit_transforms(transforms_value)?;
-        // self.path.pop();
-      // }
-  
+
+      let mut transform = Matrix::identity();
+      if pattern_hash.contains_key(key!("transforms")) {
+        let transforms_value = self.get_value_from_hash(pattern_hash, "transforms")?;
+        self.path.push(Segment::Key("transform".into()));
+        transform = self.visit_transforms(transforms_value)?;
+        self.path.pop();
+      }
+
       Ok(Pattern::from(
         Striped::default()
           .with_colors(color_a, color_b)
-          // .with_transform(transform),
+          .with_transform(transform),
       ))
     }
 
