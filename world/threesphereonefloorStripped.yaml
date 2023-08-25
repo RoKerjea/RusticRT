@@ -10,7 +10,7 @@
     material:
       type: phong
       pattern:
-        type: striped
+        type: checker
         colorA: [0, 0, 0]
         colorB: [1, 1, 1]
       specular: 0.0
@@ -21,14 +21,14 @@
     material:
       type: phong
       pattern:
-        type: striped
-        colorA: [0.1, 0.6, 0.6]
-        colorB: [0.9, 0.9, 0.9]
+        type: gradient
+        colorA: [1.0, 0.1, 0.1]
+        colorB: [0.1, 0.9, 0.1]
         transforms:
-          - type: translate
-            to: [0.5, 0, 0]
           - type: scale
-            to: [0.3, 0.3, 0.3]
+            to: [2.0, 2.0, 2.0]
+          - type: translate
+            to: [1.0, 0, 0]
           - type: rotate_z
             radians: -0.3
     transforms:
@@ -63,14 +63,14 @@
     material:
       type: phong
       pattern:
-        type: striped
+        type: ring
         colorA: [0.2, 0.6, 0.1]
         colorB: [0.1, 0.1, 0.3]
         transforms:
           - type: scale
-            to: [0.03, 1, 1]
-          - type: rotate_z
-            degrees: 90
+            to: [0.2, 0.2, 0.2]
+          - type: rotate_x
+            degrees: 50
     transforms:
       - type: scale
         to: [0.5, 0.5, 0.5]

@@ -12,7 +12,7 @@ use crate::color::Color;
 use crate::lights::PointLight;
 use crate::material::{Material, Phong};
 use crate::matrix::Matrix;
-use crate::pattern::{Pattern, Striped};
+use crate::pattern::{Pattern, Striped, Gradient, Ring, Checker};
 use crate::plane::Plane;
 use crate::sphere::Sphere;
 use crate::tuple::Tuple;
@@ -367,6 +367,9 @@ impl<'a> YamlParser<'a> {
 
         return match pattern_type.as_ref() {
             "striped" => self.visit_stripped_pattern(pattern_hash),
+            "gradient" => self.visit_gradient_pattern(pattern_hash),
+            "ring" => self.visit_ring_pattern(pattern_hash),
+            "checker" => self.visit_checker_pattern(pattern_hash),
             _ => Err(anyhow!(
                 "Unknown Pattern type '{}' found at {}",
                 pattern_type.as_ref(),
@@ -399,6 +402,78 @@ impl<'a> YamlParser<'a> {
           .with_transform(transform),
       ))
     }
+    fn visit_gradient_pattern(&mut self, pattern_hash: &yaml::Hash) -> ParserResult<Pattern> {
+        let color_a_value = self.get_value_from_hash(pattern_hash, "colorA")?;
+        self.path.push(Segment::Key("colorA".into()));
+        let color_a = self.visit_color(color_a_value)?;
+        self.path.pop();
+        let color_b_value = self.get_value_from_hash(pattern_hash, "colorB")?;
+        self.path.push(Segment::Key("colorB".into()));
+        let color_b = self.visit_color(color_b_value)?;
+        self.path.pop();
+  
+        let mut transform = Matrix::identity();
+        if pattern_hash.contains_key(key!("transforms")) {
+          let transforms_value = self.get_value_from_hash(pattern_hash, "transforms")?;
+          self.path.push(Segment::Key("transform".into()));
+          transform = self.visit_transforms(transforms_value)?;
+          self.path.pop();
+        }
+  
+        Ok(Pattern::from(
+          Gradient::default()
+            .with_colors(color_a, color_b)
+            .with_transform(transform),
+        ))
+      }
+      fn visit_ring_pattern(&mut self, pattern_hash: &yaml::Hash) -> ParserResult<Pattern> {
+        let color_a_value = self.get_value_from_hash(pattern_hash, "colorA")?;
+        self.path.push(Segment::Key("colorA".into()));
+        let color_a = self.visit_color(color_a_value)?;
+        self.path.pop();
+        let color_b_value = self.get_value_from_hash(pattern_hash, "colorB")?;
+        self.path.push(Segment::Key("colorB".into()));
+        let color_b = self.visit_color(color_b_value)?;
+        self.path.pop();
+  
+        let mut transform = Matrix::identity();
+        if pattern_hash.contains_key(key!("transforms")) {
+          let transforms_value = self.get_value_from_hash(pattern_hash, "transforms")?;
+          self.path.push(Segment::Key("transform".into()));
+          transform = self.visit_transforms(transforms_value)?;
+          self.path.pop();
+        }
+  
+        Ok(Pattern::from(
+            Ring::default()
+            .with_colors(color_a, color_b)
+            .with_transform(transform),
+        ))
+      }
+      fn visit_checker_pattern(&mut self, pattern_hash: &yaml::Hash) -> ParserResult<Pattern> {
+        let color_a_value = self.get_value_from_hash(pattern_hash, "colorA")?;
+        self.path.push(Segment::Key("colorA".into()));
+        let color_a = self.visit_color(color_a_value)?;
+        self.path.pop();
+        let color_b_value = self.get_value_from_hash(pattern_hash, "colorB")?;
+        self.path.push(Segment::Key("colorB".into()));
+        let color_b = self.visit_color(color_b_value)?;
+        self.path.pop();
+  
+        let mut transform = Matrix::identity();
+        if pattern_hash.contains_key(key!("transforms")) {
+          let transforms_value = self.get_value_from_hash(pattern_hash, "transforms")?;
+          self.path.push(Segment::Key("transform".into()));
+          transform = self.visit_transforms(transforms_value)?;
+          self.path.pop();
+        }
+  
+        Ok(Pattern::from(
+          Checker::default()
+            .with_colors(color_a, color_b)
+            .with_transform(transform),
+        ))
+      }
 
     fn visit_body(&mut self, body: &yaml::Yaml) -> ParserResult<Body> {
         let mut material = Material::default();
