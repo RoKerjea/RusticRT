@@ -94,7 +94,7 @@ impl Stencil for Striped {
 
 impl FuzzyEq<Striped> for Striped {
     fn fuzzy_eq(&self, other: Striped) -> bool {
-      self.color_a.fuzzy_eq(other.color_b) && self.color_b.fuzzy_eq(other.color_b)
+      self.color_b.fuzzy_eq(other.color_b) && self.color_b.fuzzy_eq(other.color_b)
     }
   }
 
@@ -171,6 +171,53 @@ use super::*;
     assert_fuzzy_eq!(
       Color::black(),
       pattern.color_at(Tuple::point(-1.1, 0.0, 0.0), &body)
+    );
+  }
+  #[test]
+  fn striped_pattern_adheres_to_object_transform() {
+    let transform = Matrix::scaling(2.0, 2.0, 2.0);
+    let pattern = Pattern::from(Striped::default().with_colors(Color::black(), Color::white()));
+    let body = Body::from(Sphere::default().with_transform(transform));
+
+    assert_fuzzy_eq!(
+      Color::black(),
+      pattern.color_at(Tuple::point(1.5, 0.0, 0.0), &body)
+    );
+  }
+
+  #[test]
+  fn striped_pattern_adheres_to_pattern_transform() {
+    let transform = Matrix::scaling(2.0, 2.0, 2.0);
+    let pattern = Pattern::from(
+      Striped::default()
+        .with_colors(Color::black(), Color::white())
+        .with_transform(transform),
+    );
+    let body = Body::from(Sphere::default());
+
+    assert_fuzzy_eq!(
+      Color::black(),
+      pattern.color_at(Tuple::point(1.5, 0.0, 0.0), &body)
+    );
+  }
+
+  #[test]
+  fn striped_pattern_adheres_to_object_and_pattern_transform() {
+    let transform = Matrix::scaling(2.0, 2.0, 2.0);
+    let pattern = Pattern::from(
+      Striped::default()
+        .with_colors(Color::black(), Color::white())
+        .with_transform(transform),
+    );
+    let body = Body::from(Sphere::default().with_transform(transform));
+
+    assert_fuzzy_eq!(
+      Color::black(),
+      pattern.color_at(Tuple::point(3.5, 0.0, 0.0), &body)
+    );
+    assert_fuzzy_eq!(
+      Color::white(),
+      pattern.color_at(Tuple::point(4.0, 0.0, 0.0), &body)
     );
   }
 }

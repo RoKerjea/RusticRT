@@ -50,7 +50,7 @@
           - type: scale
             to: [0.1, 0.1, 0.1]
           - type: rotate_z
-            radians: 0.785
+            degrees: 45
       diffuse: 0.9
       specular: 1.8
     transforms:
@@ -70,7 +70,7 @@
           - type: scale
             to: [0.03, 1, 1]
           - type: rotate_z
-            radians: 1.57
+            degrees: 90
     transforms:
       - type: scale
         to: [0.5, 0.5, 0.5]

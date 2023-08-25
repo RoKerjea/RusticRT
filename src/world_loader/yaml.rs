@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::f64::consts::PI;
 
 use super::{LoaderResult, WorldLoader};
 use anyhow::*;
@@ -492,6 +493,20 @@ impl<'a> YamlParser<'a> {
         Ok(combined_transform)
     }
 
+    fn visit_radians_or_degrees(&mut self, transform_hash: &yaml::Hash) -> Result<f64> {
+        if transform_hash.contains_key(key!("radians")) {
+            self.hash_value_to_float(transform_hash, "radians")
+        } else if transform_hash.contains_key(key!("degrees")) {
+            let degrees = self.hash_value_to_float(transform_hash, "degrees").unwrap();
+            Ok((degrees / 180.0) * PI)
+        } else {
+            Err(anyhow!(
+                "Expected either 'degrees' or 'radians' key, but found nothing at {}",
+                self.path.to_string()
+              ))
+        }
+    }
+
     fn visit_transform(&mut self, transform: &yaml::Yaml) -> ParserResult<Matrix<4>> {
         let transform_hash = self.value_to_hash(transform)?;
         let transform_type = self.hash_value_to_string(transform_hash, "type")?;
@@ -509,13 +524,14 @@ impl<'a> YamlParser<'a> {
             self.path.pop();
             Ok(Matrix::scaling(v.x, v.y, v.z))
         } else if transform_type.as_ref() == "rotate_x" {
-            let radians = self.hash_value_to_float(transform_hash, "radians")?;
+            // let radians = self.hash_value_to_float(transform_hash, "radians")?;
+            let radians = self.visit_radians_or_degrees(transform_hash)?;
             Ok(Matrix::rotation_x(radians))
         } else if transform_type.as_ref() == "rotate_y" {
-            let radians = self.hash_value_to_float(transform_hash, "radians")?;
+            let radians = self.visit_radians_or_degrees(transform_hash)?;
             Ok(Matrix::rotation_y(radians))
         } else if transform_type.as_ref() == "rotate_z" {
-            let radians = self.hash_value_to_float(transform_hash, "radians")?;
+            let radians = self.visit_radians_or_degrees(transform_hash)?;
             Ok(Matrix::rotation_z(radians))
         } else {
             Err(anyhow!(
@@ -562,8 +578,11 @@ impl WorldLoader for Loader {
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use crate::assert_fuzzy_eq;
     use crate::body::Body;
+    use crate::body::Intersectable;
     use crate::camera::Camera;
     use crate::material::Material;
     use crate::material::Phong;
@@ -1252,4 +1271,124 @@ mod tests {
     );
         assert_eq!(actual.to_string(), expected.to_string());
     }
+
+#[test]
+  fn specify_body_rotation_transformation_in_degrees() {
+    let source = r##"
+---
+# Right Sphere
+- body:
+    type: sphere
+    material:
+      type: phong
+      color: [0, 0.5, 1]
+    transforms:
+      - type: rotate_x
+        degrees: 180
+      - type: rotate_y
+        degrees: 90
+      - type: rotate_z
+        degrees: 423
+"##;
+
+    let yaml_loader = Loader::default();
+    let result = yaml_loader.load_world(source);
+    assert!(!result.is_err());
+    let (world, _camera_hash) = result.unwrap();
+
+    assert_eq!(1, world.bodies.len());
+    let body = world.bodies[0];
+
+    let expected_transform = Matrix::rotation_z(423.0 / 180.0 * PI)
+      * Matrix::rotation_y(90.0 / 180.0 * PI)
+      * Matrix::rotation_x(PI);
+
+    assert_eq!(expected_transform, body.transform());
+  }
+
+  #[test]
+  fn striped_pattern_in_body_is_parsed() {
+    let source = r##"
+---
+- body:
+    type: sphere
+    material:
+      type: phong
+      pattern:
+        type: striped
+        colorA: [0,0,0]
+        colorB: [1,1,1]
+        transforms:
+          - type: scale
+            to: [.2,.2,.2]
+          - type: rotate_z
+            degrees: 45
+"##;
+
+    let color_a = Color::new(0.0, 0.0, 0.0);
+    let color_b = Color::new(1.0, 1.0, 1.0);
+    let pattern_transform =
+      Matrix::rotation_z((45.0 / 180.0) * PI) * Matrix::scaling(0.2, 0.2, 0.2);
+    let pattern = Pattern::from(
+      Striped::default()
+        .with_colors(color_a, color_b)
+        .with_transform(pattern_transform),
+    );
+
+    let material = Material::from(Phong::default().with_pattern(pattern));
+    let body_transform = Matrix::identity();
+    let sphere = Sphere::default()
+      .with_material(material)
+      .with_transform(body_transform);
+    let body = Body::from(sphere);
+
+    let yaml_loader = Loader::default();
+
+    let (loaded_world, _) = yaml_loader.load_world(source).unwrap();
+    assert_eq!(1, loaded_world.bodies.len());
+    assert_eq!(body, loaded_world.bodies[0]);
+  }
+
+  #[test]
+  fn colorful_striped_pattern_in_body_is_parsed() {
+    let source = r##"
+---
+- body:
+    type: sphere
+    material:
+      type: phong
+      pattern:
+        type: striped
+        colorA: [0.1,0.2,0.3]
+        colorB: [0.4,0.5,0.6]
+        transforms:
+          - type: scale
+            to: [.2,.2,.2]
+          - type: rotate_z
+            degrees: 90
+"##;
+
+    let color_a = Color::new(0.1, 0.2, 0.3);
+    let color_b = Color::new(0.4, 0.5, 0.6);
+    let pattern_transform =
+      Matrix::rotation_z((90.0 / 180.0) * PI) * Matrix::scaling(0.2, 0.2, 0.2);
+    let pattern = Pattern::from(
+      Striped::default()
+        .with_colors(color_a, color_b)
+        .with_transform(pattern_transform),
+    );
+
+    let material = Material::from(Phong::default().with_pattern(pattern));
+    let body_transform = Matrix::identity();
+    let sphere = Sphere::default()
+      .with_material(material)
+      .with_transform(body_transform);
+    let body = Body::from(sphere);
+
+    let yaml_loader = Loader::default();
+
+    let (loaded_world, _) = yaml_loader.load_world(source).unwrap();
+    assert_eq!(1, loaded_world.bodies.len());
+    assert_eq!(body, loaded_world.bodies[0]);
+  }
 }
