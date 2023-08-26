@@ -1,0 +1,59 @@
+Pattern:
+	☐ fix checker and ring for sphere (bonus chapter)
+	☐ add radial gradient ptrn
+	☐ add nested pattern (a bit complex)
+		/maybe change color with option of color or subpattern?
+		/complicated to parse, but it would just be a struct in a struct, it's probably doable
+	☐ blending pattern (probably the easiest, it's just 2 pattern to check consecutively, then averaging result)
+	☐ perturbed pattern (perlin noise or other random with defined max range, then modifying the point to check color at)
+Definitive objectives:
+	☐ texture mapping
+	☐ skybox option
+	☐ bump mapping
+	☐ normal mapping
+	☐ torus
+	☐ triangle
+	☐ anti-aliasing (sampling, adapative sampling,racoon-artworks.de/cgbasics/sampling.php)
+	☐ more primitive forms (paraboloid, hyperboloid, tablecloth, toroid)
+	☐ webassembly port for web browser (super hard to do fast rendering, but it's a challenge)
+	☐ website to show off the project, with yaml editor and rendering (maybe interaction?)
+	☐ selection of possible scene, with miniatures. when clicking on one, it loads the yaml in the editor
+	☐ add a way to save the image (maybe a button to download it)
+Bonus:
+	☐ soft shadows bonus (http://raytracerchallenge.com/bonus/area-light.html)
+	☐ spotlights
+	☐ use Vulkan
+	☐ Binary space partitioning? bounding boxes?
+	☐ Super space partitioning, (https://ieeexplore.ieee.org/document/4342592)
+	☐ kd-tree (https://www.cedricfleury.fr/media/rapportCTR_cfleury.pdf)
+	☐ interaction from input (keyboard for movement, mouse for rotation)
+	☐ click detection (raytracing)
+	☐ interactive parameters for clicked object
+	☐ volumetric effects (fog, cloud, smoke, fire)
+	☐ check raytracing gems book (2volumes)
+	☐ texture aleatoire bois/marbre (http://gregory.corgie.free.fr/dotclear/images/Raytracing/Rapport_Raytracing.pdf)
+	☐ motion blur
+	☐ stereoscopy?
+	☐ color filter (sepia, monochrome, etc)
+	☐ cartoon effect? What do they mean by that?
+	☐ interface, loading bar, shortcut visible at launch, menu, etc
+	☐ cloth?
+	☐ random equation resolution from a configuration file (GNU lib) (I have no idea what that means)
+	☐ fractal objects, with limits
+	☐ light bulb filament?? (thats cool)
+	☐ video or animation rendering
+	☐ pov or 3ds files parsing (super cool)
+	☐ moebius ribbon
+	☐ caustics and or global illumination (what?)
+	☐ portals (light source that need to send lots of ray or risk creating lots of noise)
+	☐ albedo (https://www.racoon-artworks.de/cgbasics/albedoandphotorealism.php)
+
+Future uses:
+	if its fast enough, maybe use it for a game engine?
+	☐ i could probably create an independant chess engine in rust (a complete project in itself, years of work)
+	☐ if i assign pieces and positions to the chess engine, i could translate it in 3d
+	☐ if i can translate pieces movement from chess to rt, i can at least create an animation of a full game
+	☐ if that work fast enough, it would be possible to add the interactivity by clicking the pieces and	effecting a valid move
+	☐ now i would have a 3d chess game, which would need menus and interfaces, but it would be very impressive
+	☐ is it possible to use chess.com or Lichess API or events to play online?
+	
