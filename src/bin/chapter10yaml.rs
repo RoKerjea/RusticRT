@@ -17,9 +17,9 @@ fn main() -> Result<()> {
     println!(
       r#"
 The Raytracer Challenge Rust Renderer
-(c) 2021 Jakob Westhoff
+(c) 2023 Robin Kerjean
 
-Usage: {} <world.yaml>
+Usage: {} <scene.yaml>
     "#,
       args[0]
     );

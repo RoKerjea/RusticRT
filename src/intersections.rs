@@ -25,8 +25,9 @@ impl Intersection {
 		if inside{
 			normalv = -normalv;
 		}
+    let reflectv = self.ray.direction.reflect(normalv);
     let over_point = position + (normalv * EPSILON);
-		ComputedIntersection::new(self, position, over_point, normalv, eyev, inside)
+		ComputedIntersection::new(self, position, over_point, normalv, eyev, inside, reflectv)
 	}
 }
 
@@ -85,6 +86,7 @@ impl IntoIterator for Intersections {
 mod tests {
   use super::*;
   use crate::matrix::Matrix;
+use crate::plane::Plane;
 use crate::tuple::Tuple;
   use crate::sphere::Sphere;
 
@@ -162,6 +164,7 @@ use crate::tuple::Tuple;
     assert_eq!(c.inside, true);
     assert_eq!(c.normalv, Tuple::vector(0.0, 0.0, -1.0));
   }
+
   #[test]
   fn the_hit_should_offset_the_point() {
     // let material = Material::default();
@@ -172,5 +175,16 @@ use crate::tuple::Tuple;
     let c = i.get_computed();
     assert!(c.over_point.z < -EPSILON / 2.0);
     assert!(c.point.z > c.over_point.z);
+  }
+
+  #[test]
+  fn precomputing_reflection_vector() {
+    let shape = Plane::default();
+    let r = Ray::new(Tuple::point(0.0, 1.0, -1.0),
+      Tuple::vector(0.0, -(2.0 as F).sqrt() / 2.0, (2.0 as F).sqrt() / 2.0));
+
+    let i = Intersection::new((2.0 as F).sqrt(), r, shape.into());
+    let c = i.get_computed();
+    assert_eq!(c.reflectv, Tuple::vector(0.0, (2.0 as F).sqrt() / 2.0, (2.0 as F).sqrt() / 2.0));
   }
 }

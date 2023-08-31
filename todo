@@ -19,6 +19,7 @@ Definitive objectives:
 	☐ website to show off the project, with yaml editor and rendering (maybe interaction?)
 	☐ selection of possible scene, with miniatures. when clicking on one, it loads the yaml in the editor
 	☐ add a way to save the image (maybe a button to download it)
+	☐ use blender to create model for assets, learn to export those models?
 Bonus:
 	☐ soft shadows bonus (http://raytracerchallenge.com/bonus/area-light.html)
 	☐ spotlights
@@ -50,6 +51,9 @@ Bonus:
 
 Future uses:
 	if its fast enough, maybe use it for a game engine?
+	☐ i can design groups or constructive geometry for unique chess pieces
+	☐ they could be stored as assets in a specific file
+	☐ i could create a specific scene parser
 	☐ i could probably create an independant chess engine in rust (a complete project in itself, years of work)
 	☐ if i assign pieces and positions to the chess engine, i could translate it in 3d
 	☐ if i can translate pieces movement from chess to rt, i can at least create an animation of a full game

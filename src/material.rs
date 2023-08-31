@@ -286,4 +286,10 @@ mod tests {
 
         assert_eq!(actual_result, expected_result);
     }
+    #[test]
+    fn phong_material_has_reflectiveness_by_default() {
+        let m = Phong::default();
+
+        assert_eq!(m.reflective, 0.0);
+    }
 }
