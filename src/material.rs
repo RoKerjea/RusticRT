@@ -59,6 +59,7 @@ pub struct Phong {
     pub diffuse: F,
     pub specular: F,
     pub shine: F,
+    pub reflective: F,
 }
 
 impl Default for Phong {
@@ -70,6 +71,7 @@ impl Default for Phong {
             diffuse: 0.9,
             specular: 0.9,
             shine: 200.0,
+            reflective: 0.0,
         }
     }
 }
@@ -116,16 +118,6 @@ impl Illuminated for Phong {
 }
 
 impl Phong {
-    pub fn new(color: Color, ambient: F, diffuse: F, specular: F, shine: F) -> Self {
-        Phong {
-            color,
-            pattern: None,
-            ambient,
-            diffuse,
-            specular,
-            shine,
-        }
-    }
     pub fn with_color(mut self, color: Color) -> Self {
         self.color = color;
         self
@@ -152,6 +144,10 @@ impl Phong {
     }
     pub fn with_pattern(mut self, pattern: Pattern) -> Self {
         self.pattern = Some(pattern);
+        self
+    }
+    pub fn with_reflective(mut self, reflective: F) -> Self {
+        self.reflective = reflective;
         self
     }
 }
