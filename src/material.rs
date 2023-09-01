@@ -19,6 +19,10 @@ pub trait Illuminated {
     ) -> Color;
 }
 
+pub trait Reflective {
+    fn reflectiveness(&self) -> F;
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Material {
     Phong(Phong),
@@ -51,6 +55,14 @@ impl Illuminated for Material {
     }
 }
 
+impl Reflective for Material {
+    fn reflectiveness(&self) -> F {
+        match *self {
+        Material::Phong(ref m) => m.reflective
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Phong {
     pub color: Color,
@@ -75,6 +87,7 @@ impl Default for Phong {
         }
     }
 }
+
 
 impl Illuminated for Phong {
     fn lighting(

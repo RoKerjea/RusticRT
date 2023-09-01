@@ -85,10 +85,14 @@ impl IntoIterator for Intersections {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::matrix::Matrix;
+  use crate::color::Color;
+use crate::lights::PointLight;
+use crate::material::{Phong, Material};
+use crate::matrix::Matrix;
 use crate::plane::Plane;
 use crate::tuple::Tuple;
   use crate::sphere::Sphere;
+use crate::world::World;
 
   #[test]
   fn the_hit_when_all_intersections_have_positive_t() {
@@ -186,5 +190,58 @@ use crate::tuple::Tuple;
     let i = Intersection::new((2.0 as F).sqrt(), r, shape.into());
     let c = i.get_computed();
     assert_eq!(c.reflectv, Tuple::vector(0.0, (2.0 as F).sqrt() / 2.0, (2.0 as F).sqrt() / 2.0));
+  }
+  fn create_default_world() -> World {
+    let light = PointLight::new(Tuple::point(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+    let material = Phong {
+        color: Color::new(0.8, 1.0, 0.6),
+        diffuse: 0.7,
+        specular: 0.2,
+        ambient: 0.0,
+        ..Phong::default()
+    };
+    let s1 = Body::from(Sphere::default().with_material(Material::from(material)));
+    let s2 = Body::from(Sphere::default().with_transform(Matrix::scaling(0.5, 0.5, 0.5)));
+
+        World::new(vec![s1, s2], vec![light])
+  }
+
+  #[test]
+  fn reflected_color_for_nonreflective_material() {
+    let world = create_default_world();
+    let r = Ray::new(Tuple::point(0.0, 0.0, 0.0),
+      Tuple::vector(0.0, 0.0, 1.0));
+    let shape = world.bodies[1];
+    let i = Intersection::new(1.0, r, shape.into());
+    let c = i.get_computed();
+    let color = world.reflect_color_at(&i.body.material(), &c, 1);
+    assert_eq!(color, Color::black());
+  }
+  #[test]
+  fn reflection_color_if_reflective_body_is_hit() {
+    let reflective_material = Material::from(
+      Phong::default()
+        .with_color(Color::new(0.5, 0.25, 0.125))
+        .with_ambient(1.0)
+        .with_reflective(0.5),
+    );
+    let s1 = Body::from(Sphere::default().with_material(reflective_material));
+    let world = World::new(
+      vec![s1],
+      vec![PointLight::new(
+        Tuple::point(10.0, 10.0, 10.0),
+        Color::white(),
+      )],
+    );
+    let ray = Ray::new(Tuple::point(0.0, 0.0, 0.0), Tuple::vector(0.0, 0.0, 1.0));
+
+    let intersection = Intersection::new(1.0, ray, s1);
+    let reflected_color = world.reflect_color_at(
+      &intersection.body.material(),
+      &intersection.get_computed(),
+      2,
+    );
+
+    assert_eq!(reflected_color, Color::new(0.375, 0.1875, 0.09375));
   }
 }

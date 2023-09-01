@@ -1,6 +1,7 @@
 
 use crate::body::*;
 use crate::color::Color;
+use crate::computed_intersection::ComputedIntersection;
 use crate::fuzzy_eq::FuzzyEq;
 use crate::intersections::*;
 use crate::lights::PointLight;
@@ -12,11 +13,14 @@ use crate::tuple::Tuple;
 pub struct World {
     pub bodies: Vec<Body>,
     pub lights: Vec<PointLight>,
+    pub reflection_limit: usize,
 }
 
 impl World {
     pub fn new(bodies: Vec<Body>, lights: Vec<PointLight>) -> Self {
-        World { bodies, lights }
+        //FIXME make reflection_limit configurable
+        //FIXME change world parsing to update
+        World { bodies, lights , reflection_limit: 5}
     }
     pub fn intersect(&self, ray: Ray) -> Intersections {
         // need more infos about iter, flat_map and collect
@@ -29,18 +33,49 @@ impl World {
     }
 
     pub fn color_at(&self, ray: Ray) -> Color {
+        // let xs = self.intersect(ray);
+
+        // let hit = xs.hit();
+        // if let Some(hit) = hit {
+        //     let c = hit.get_computed();
+        //     let material = hit.body.material();
+        //     let is_in_shadow = self.is_shadowed(c.over_point);
+        //     let surface_color = material.lighting(&hit.body, self.lights[0], c.over_point, c.eyev, c.normalv, is_in_shadow);
+        //     let reflected_color = self.reflect_color_at(&material, &c);
+        //     surface_color + reflected_color
+        // } else {
+        //     Color::black()
+        // }
+        self.color_at_with_reflection_limit(ray, self.reflection_limit)
+    }
+
+    fn color_at_with_reflection_limit(&self, ray: Ray, remaining_reflections: usize) -> Color
+    {
         let xs = self.intersect(ray);
-        
+
         let hit = xs.hit();
         if let Some(hit) = hit {
             let c = hit.get_computed();
             let material = hit.body.material();
             let is_in_shadow = self.is_shadowed(c.over_point);
-            material.lighting(&hit.body, self.lights[0], c.over_point, c.eyev, c.normalv, is_in_shadow)
+            let surface_color = material.lighting(&hit.body, self.lights[0], c.over_point, c.eyev, c.normalv, is_in_shadow);
+            let reflected_color = self.reflect_color_at(&material, &c, remaining_reflections);
+            surface_color + reflected_color
         } else {
             Color::black()
         }
     }
+
+    pub fn reflect_color_at(&self, material: &Material, computed_intersection: &ComputedIntersection, remaining_reflections: usize) -> Color {
+        if material.reflectiveness() == 0.0 || remaining_reflections == 0
+        {
+           return Color::black()
+        }
+        let reflected_ray = Ray::new(computed_intersection.over_point, computed_intersection.reflectv);
+        let reflected_color = self.color_at_with_reflection_limit(reflected_ray, remaining_reflections - 1);
+        reflected_color * material.reflectiveness()
+    }
+
     fn is_shadowed(&self, position: Tuple) -> bool {
         let v = self.lights[0].position - position;
         let distance = v.magnitude();
@@ -62,6 +97,7 @@ impl Default for World {
         World {
             bodies: vec![],
             lights: vec![],
+            reflection_limit : 5,
         }
     }
 }
