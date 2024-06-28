@@ -186,11 +186,13 @@ use crate::world::World;
     let shape = Plane::default();
     let r = Ray::new(Tuple::point(0.0, 1.0, -1.0),
       Tuple::vector(0.0, -(2.0 as F).sqrt() / 2.0, (2.0 as F).sqrt() / 2.0));
-
     let i = Intersection::new((2.0 as F).sqrt(), r, shape.into());
+
     let c = i.get_computed();
+
     assert_eq!(c.reflectv, Tuple::vector(0.0, (2.0 as F).sqrt() / 2.0, (2.0 as F).sqrt() / 2.0));
   }
+
   fn create_default_world() -> World {
     let light = PointLight::new(Tuple::point(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
     let material = Phong {

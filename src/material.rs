@@ -305,4 +305,10 @@ mod tests {
 
         assert_eq!(m.reflective, 0.0);
     }
+	#[test]
+	fn phong_material_can_be_assigned_reflectivness() {
+		let m = Phong::default().with_reflective(0.5);
+
+		assert_eq!(m.reflective, 0.5);
+	}
 }
